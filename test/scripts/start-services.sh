@@ -201,7 +201,7 @@ start_relayer()
 
 cleanup() {
     trap - SIGTERM
-    kill -- -"$(ps -o pgid:1= $$)"
+    kill -- "$(ps -o pgid=$$ | head -n 1)"
 }
 
 trap cleanup SIGINT SIGTERM EXIT
@@ -223,7 +223,7 @@ configure_contracts
 start_relayer
 
 echo "Process Tree:"
-pstree -T $$
+pstree $$
 
 sleep 3
 until grep "Syncing headers starting..." ethereum-relay.log > /dev/null; do
