@@ -102,7 +102,7 @@ func getPeaks(mmrSize uint64) []uint64 {
 	return peaksPositions
 }
 
-func calculateMerkleProofOrder(leavePos uint64, proofItems []types.H256) (error, uint64) {
+func CalculateMerkleProofOrder(leavePos uint64, proofItems []types.H256) (error, uint64) {
 	var proofOrder uint64
 	currentBitFieldPosition := 0
 
@@ -206,7 +206,7 @@ func ConvertToSimplifiedMMRProof(blockhash types.H256, leafIndex uint64, leaf ty
 		localizedMerkleRootPosition = leafPos - peaks[merkleRootPeakPosition-1] - 1
 	}
 
-	err, proofOrder := calculateMerkleProofOrder(localizedMerkleRootPosition, merkleProof)
+	err, proofOrder := CalculateMerkleProofOrder(localizedMerkleRootPosition, merkleProof)
 	if err != nil {
 		return SimplifiedMMRProof{}, err
 	}

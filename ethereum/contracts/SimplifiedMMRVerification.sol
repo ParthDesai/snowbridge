@@ -11,7 +11,7 @@ contract  SimplifiedMMRVerification {
     function verifyInclusionProof(
         bytes32 root,
         bytes32 leafNodeHash,
-        SimplifiedMMRProof memory proof
+        SimplifiedMMRProof calldata proof
     ) public pure returns (bool) {
         require(proof.merkleProofItems.length < 64);
 
@@ -68,11 +68,20 @@ contract  SimplifiedMMRVerification {
         }
     }
 
+    function verifyMerkleRoot(
+        bytes32 root,
+        bytes32 leafNodeHash,
+        bytes32[] calldata merkleProofItems,
+        uint64 merkleProofOrderBitField
+    ) public pure returns (bool) {
+        return calculateMerkleRoot(leafNodeHash, merkleProofItems, merkleProofOrderBitField) == root;
+    }
+
     function calculateMerkleRoot(
         bytes32 leafNodeHash,
-        bytes32[] memory merkleProofItems,
+        bytes32[] calldata merkleProofItems,
         uint64 merkleProofOrderBitField
-    ) internal pure returns (bytes32) {
+    ) public pure returns (bytes32) {
         bytes32 currentHash = leafNodeHash;
 
         for (uint currentPosition = 0; currentPosition < merkleProofItems.length; currentPosition++) {
