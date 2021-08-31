@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "./utils/Bits.sol";
 import "./utils/Bitfield.sol";
 import "./ValidatorRegistry.sol";
-import "./SimplifiedMMRVerification.sol";
+import "./utils/SimplifiedMMRVerification.sol";
 import "./ScaleCodec.sol";
 
 /**
@@ -118,7 +118,6 @@ contract BeefyLightClient {
     /* State */
 
     ValidatorRegistry public validatorRegistry;
-    SimplifiedMMRVerification public mmrVerification;
     uint256 public currentId;
     bytes32 public latestMMRRoot;
     uint64 public latestBeefyBlock;
@@ -146,11 +145,9 @@ contract BeefyLightClient {
      */
     constructor(
         ValidatorRegistry _validatorRegistry,
-        SimplifiedMMRVerification _mmrVerification,
         uint64 _startingBeefyBlock
     ) {
         validatorRegistry = _validatorRegistry;
-        mmrVerification = _mmrVerification;
         currentId = 0;
         latestBeefyBlock = _startingBeefyBlock;
     }
@@ -164,10 +161,10 @@ contract BeefyLightClient {
      */
     function verifyBeefyMerkleLeaf(
         bytes32 beefyMMRLeaf,
-        SimplifiedMMRProof memory proof
+        SimplifiedMMRVerification.SimplifiedMMRProof memory proof
     ) external view returns (bool) {
         return
-            mmrVerification.verifyInclusionProof(
+            SimplifiedMMRVerification.verifyInclusionProof(
                 latestMMRRoot,
                 beefyMMRLeaf,
                 proof
@@ -189,7 +186,7 @@ contract BeefyLightClient {
         bytes32 commitmentHash,
         uint256[] memory validatorClaimsBitfield,
         bytes memory validatorSignature,
-        uint256 validatorPosition,
+        uint64 validatorPublicKeyMerkleProofOrder,
         address validatorPublicKey,
         bytes32[] calldata validatorPublicKeyMerkleProof
     ) public payable {
@@ -199,7 +196,7 @@ contract BeefyLightClient {
         require(
             validatorRegistry.checkValidatorInSet(
                 validatorPublicKey,
-                validatorPosition,
+                validatorPublicKeyMerkleProofOrder,
                 validatorPublicKeyMerkleProof
             ),
             "Error: Sender must be in validator set at correct position"
@@ -282,7 +279,7 @@ contract BeefyLightClient {
         Commitment calldata commitment,
         ValidatorProof calldata validatorProof,
         BeefyMMRLeaf calldata latestMMRLeaf,
-        SimplifiedMMRProof calldata proof
+        SimplifiedMMRVerification.SimplifiedMMRProof calldata proof
     ) public {
         verifyCommitment(id, commitment, validatorProof);
         verifyNewestMMRLeaf(
@@ -334,12 +331,12 @@ contract BeefyLightClient {
     function verifyNewestMMRLeaf(
         BeefyMMRLeaf calldata leaf,
         bytes32 root,
-        SimplifiedMMRProof calldata proof
+        SimplifiedMMRVerification.SimplifiedMMRProof calldata proof
     ) public view {
         bytes memory encodedLeaf = encodeMMRLeaf(leaf);
         bytes32 hashedLeaf = hashMMRLeaf(encodedLeaf);
 
-        mmrVerification.verifyInclusionProof(
+        SimplifiedMMRVerification.verifyInclusionProof(
             root,
             hashedLeaf,
             proof
@@ -505,7 +502,8 @@ contract BeefyLightClient {
     function verifyValidatorSignature(
         uint256[] memory randomBitfield,
         bytes calldata signature,
-        uint256 position,
+        uint256 validatorPosition,
+        uint64 publicKeyMerkleProofOrder,
         address publicKey,
         bytes32[] calldata publicKeyMerkleProof,
         bytes32 commitmentHash
@@ -514,14 +512,14 @@ contract BeefyLightClient {
          * @dev Check if validator in randomBitfield
          */
         require(
-            randomBitfield.isSet(position),
+            randomBitfield.isSet(validatorPosition),
             "Error: Validator must be once in bitfield"
         );
 
         /**
          * @dev Remove validator from randomBitfield such that no validator can appear twice in signatures
          */
-        randomBitfield.clear(position);
+        randomBitfield.clear(validatorPosition);
 
         /**
          * @dev Check if merkle proof is valid
@@ -529,7 +527,7 @@ contract BeefyLightClient {
         require(
             validatorRegistry.checkValidatorInSet(
                 publicKey,
-                position,
+                publicKeyMerkleProofOrder,
                 publicKeyMerkleProof
             ),
             "Error: Validator must be in validator set at correct position"

@@ -1,13 +1,13 @@
 pragma solidity ^0.8.5;
 
-struct SimplifiedMMRProof {
-    bytes32[] restOfThePeaks;
-    bytes32 rightBaggedPeak;
-    bytes32[] merkleProofItems;
-    uint64 merkleProofOrderBitField;
-}
+library SimplifiedMMRVerification {
+    struct SimplifiedMMRProof {
+        bytes32[] restOfThePeaks;
+        bytes32 rightBaggedPeak;
+        bytes32[] merkleProofItems;
+        uint64 merkleProofOrderBitField;
+    }
 
-contract  SimplifiedMMRVerification {
     function verifyInclusionProof(
         bytes32 root,
         bytes32 leafNodeHash,

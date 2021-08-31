@@ -3,7 +3,7 @@ pragma solidity ^0.8.5;
 pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./utils/MerkleProof.sol";
+import "./utils/SimplifiedMMRVerification.sol";
 
 /**
  * @title A contract storing state on the current validator set
@@ -45,23 +45,21 @@ contract ValidatorRegistry is Ownable {
     /**
      * @notice Checks if a validators address is a member of the merkle tree
      * @param addr The address of the validator to check
-     * @param pos The position of the validator to check, index starting at 0
+     * @param order Order of the merkle proof items
      * @param proof Merkle proof required for validation of the address
      * @return Returns true if the validator is in the set
      */
     function checkValidatorInSet(
         address addr,
-        uint256 pos,
+        uint64 order,
         bytes32[] memory proof
     ) public view returns (bool) {
         bytes32 hashedLeaf = keccak256(abi.encodePacked(addr));
-        return
-            MerkleProof.verifyMerkleLeafAtPosition(
+        return SimplifiedMMRVerification.verifyMerkleRoot(
                 root,
                 hashedLeaf,
-                pos,
-                numOfValidators,
-                proof
+                proof,
+                order
             );
     }
 }

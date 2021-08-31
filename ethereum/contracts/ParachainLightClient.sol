@@ -2,9 +2,8 @@
 pragma solidity ^0.8.5;
 
 import "./BeefyLightClient.sol";
-import "./utils/MerkleProof.sol";
 import "./ScaleCodec.sol";
-import "./SimplifiedMMRVerification.sol";
+import "./utils/SimplifiedMMRVerification.sol";
 
 library ParachainLightClient {
     struct OwnParachainHead {
@@ -15,9 +14,9 @@ library ParachainLightClient {
         bytes32 commitment;
     }
 
+    // TODO: Change pos to order
     struct ParachainHeadProof {
-        uint256 pos;
-        uint256 width;
+        uint64 order;
         bytes32[] proof;
     }
 
@@ -42,7 +41,7 @@ library ParachainLightClient {
         bytes32 commitment,
         ParachainVerifyInput calldata _parachainVerifyInput,
         BeefyMMRLeafPartial calldata _beefyMMRLeafPartial,
-        SimplifiedMMRProof calldata proof,
+        SimplifiedMMRVerification.SimplifiedMMRProof calldata proof,
         BeefyLightClient beefyLightClient
     ) internal view {
         // 1. Compute our parachains merkle leaf by combining the parachain id, commitment data
@@ -55,11 +54,10 @@ library ParachainLightClient {
 
         // 2. Compute `parachainHeadsRoot` by verifying the merkle proof using `ownParachainHeadHash` and
         // `_parachainHeadsProof`
-        bytes32 parachainHeadsRoot = MerkleProof.computeRootFromProofAtPosition(
+        bytes32 parachainHeadsRoot = SimplifiedMMRVerification.calculateMerkleRoot(
             ownParachainHeadHash,
-            _parachainVerifyInput.parachainHeadProof.pos,
-            _parachainVerifyInput.parachainHeadProof.width,
-            _parachainVerifyInput.parachainHeadProof.proof
+            _parachainVerifyInput.parachainHeadProof.proof,
+            _parachainVerifyInput.parachainHeadProof.order
         );
 
         // 3. Compute the `beefyMMRLeaf` using `parachainHeadsRoot` and `_beefyMMRLeafPartial`
