@@ -433,7 +433,7 @@ pub fn hash_tree_root_beacon_body<
 }
 
 pub fn hash_tree_root_sync_committee<S: Get<u32>>(
-	sync_committee: SyncCommittee<S>,
+	sync_committee: &SyncCommittee<S>,
 ) -> Result<[u8; 32], MerkleizationError> {
 	let mut pubkeys_vec = Vec::new();
 

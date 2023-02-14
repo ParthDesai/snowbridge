@@ -587,6 +587,7 @@ parameter_types! {
 	pub const MaxAttestationSize: u32 = 128;
 	pub const MaxValidatorsPerCommittee: u32 = 2048;
 	pub const WeakSubjectivityPeriodSeconds: u32 = 97200;
+	pub const SyncCommitteePruneThreshold: u32 = 10;
 	pub const ChainForkVersions: ForkVersions = ForkVersions{
 		genesis: Fork {
 			version: [0, 0, 0, 1], // 0x00000001
@@ -621,6 +622,7 @@ impl ethereum_beacon_client::Config for Runtime {
 	type MaxValidatorsPerCommittee = MaxValidatorsPerCommittee;
 	type ForkVersions = ChainForkVersions;
 	type WeakSubjectivityPeriodSeconds = WeakSubjectivityPeriodSeconds;
+	type SyncCommitteePruneThreshold = SyncCommitteePruneThreshold;
 	type WeightInfo = weights::ethereum_beacon_client::SnowbridgeWeight<Self>;
 }
 

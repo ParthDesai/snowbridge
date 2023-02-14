@@ -132,6 +132,7 @@ pub struct ExecutionHeaderState {
 #[derive(Default, Encode, Decode, TypeInfo, MaxEncodedLen)]
 pub struct FinalizedHeaderState {
 	pub beacon_block_root: H256,
+	pub beacon_block_header: BeaconHeader,
 	pub beacon_slot: u64,
 	pub import_time: u64,
 }

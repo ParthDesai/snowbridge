@@ -37,3 +37,5 @@ pub const DOMAIN_SYNC_COMMITTEE: [u8; 4] = [7, 0, 0, 0];
 
 pub const PUBKEY_SIZE: usize = 48;
 pub const SIGNATURE_SIZE: usize = 96;
+
+pub const GENESIS_SLOT: u64 = 0;

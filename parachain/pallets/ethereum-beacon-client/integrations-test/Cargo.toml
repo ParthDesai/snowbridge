@@ -1,14 +1,11 @@
 [package]
-name = "snowbridge-ethereum-beacon-client"
-description = "Snowbridge Beacon Client Pallet"
+name = "integration-tests"
+description = "Beacon Client Pallet integration tests"
 version = "0.0.1"
 edition = "2021"
-authors = ["Snowfork <contact@snowfork.com>"]
-repository = "https://github.com/Snowfork/snowbridge"
+authors = ["Parth <desaiparth08@gmail.com>"]
+repository = ""
 license = "PENDING/TBC"
-
-[package.metadata.docs.rs]
-targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
 serde = { version = "1.0.137", optional = true }
@@ -29,13 +26,14 @@ sp-std = { git = "https://github.com/paritytech/substrate.git", branch = "polkad
 sp-io = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30", default-features = false }
 sp-runtime = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30", default-features = false }
 
-snowbridge-beacon-primitives = { path = "../../primitives/beacon", default-features = false }
+snowbridge-beacon-primitives = { path = "../../../primitives/beacon", default-features = false }
 
-[dev-dependencies]
-sp-keyring = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30" }
-serde_json = "1.0.68"
-hex-literal = { version = "0.3.4" }
+serde_json = { version = "1.0.68" }
+
 pallet-timestamp = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30", default-features = false }
+
+snowbridge-ethereum-beacon-client = { path = "../../ethereum-beacon-client", default-features = false }
+
 
 [features]
 default = ["std"]
@@ -53,15 +51,4 @@ std = [
     "milagro_bls/std",
     "ssz-rs/std",
     "byte-slice-cast/std"
-]
-runtime-benchmarks = [
-    "frame-benchmarking",
-    "frame-support/runtime-benchmarks",
-    "frame-system/runtime-benchmarks",
-    "hex-literal"
-]
-
-[workspace]
-members = [
-    "integrations-test"
 ]
