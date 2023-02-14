@@ -84,6 +84,7 @@ pub mod mock_mainnet {
 		pub const MaxValidatorsPerCommittee: u32 = config::MAX_VALIDATORS_PER_COMMITTEE as u32;
 		pub const WeakSubjectivityPeriodSeconds: u32 = 97200;
 		pub const SyncCommitteePruneThreshold: u32 = 10;
+        pub const ExecutionHeadersPruneThreshold: u32 = 64;
 		pub const ChainForkVersions: ForkVersions = ForkVersions{
 			genesis: Fork {
 				version: [0, 0, 0, 0], // 0x00001020
@@ -120,6 +121,7 @@ pub mod mock_mainnet {
         type WeakSubjectivityPeriodSeconds = WeakSubjectivityPeriodSeconds;
         type WeightInfo = ();
         type SyncCommitteePruneThreshold = SyncCommitteePruneThreshold;
+        type ExecutionHeadersPruneThreshold = ExecutionHeadersPruneThreshold;
     }
 }
 
@@ -196,6 +198,7 @@ pub mod mock_goerli {
 		pub const MaxValidatorsPerCommittee: u32 = config::MAX_VALIDATORS_PER_COMMITTEE as u32;
 		pub const WeakSubjectivityPeriodSeconds: u32 = 97200;
 		pub const SyncCommitteePruneThreshold: u32 = 10;
+        pub const ExecutionHeadersPruneThreshold: u32 = 64;
 		pub const ChainForkVersions: ForkVersions = ForkVersions{
 			genesis: Fork {
 				version: [0, 0, 16, 32], // 0x00001020
@@ -233,6 +236,7 @@ pub mod mock_goerli {
         type WeakSubjectivityPeriodSeconds = WeakSubjectivityPeriodSeconds;
         type WeightInfo = ();
         type SyncCommitteePruneThreshold = SyncCommitteePruneThreshold;
+        type ExecutionHeadersPruneThreshold = ExecutionHeadersPruneThreshold;
     }
 }
 
