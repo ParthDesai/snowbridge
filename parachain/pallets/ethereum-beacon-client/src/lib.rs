@@ -2,8 +2,12 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 mod merkleization;
-#[cfg(test)]
+
 pub mod weights;
+#[cfg(test)]
+mod tests;
+#[cfg(test)]
+mod mock;
 
 mod ssz;
 
@@ -11,7 +15,6 @@ mod ssz;
 mod benchmarking;
 
 mod config;
-mod mock;
 
 pub use weights::WeightInfo;
 

@@ -60,8 +60,4 @@ runtime-benchmarks = [
     "frame-system/runtime-benchmarks",
     "hex-literal"
 ]
-
-[workspace]
-members = [
-    "integrations-test"
-]
+mainnet = []

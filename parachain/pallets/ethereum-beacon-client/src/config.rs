@@ -1,14 +1,12 @@
-#[cfg(feature = "minimal")]
-mod minimal;
-
-#[cfg(not(feature = "minimal"))]
+#[cfg(feature = "mainnet")]
 mod mainnet;
-
-#[cfg(feature = "minimal")]
-pub use minimal::*;
-
-#[cfg(not(feature = "minimal"))]
+#[cfg(feature = "mainnet")]
 pub use mainnet::*;
+
+#[cfg(not(feature = "mainnet"))]
+mod goerli;
+#[cfg(not(feature = "mainnet"))]
+pub use goerli::*;
 
 pub const CURRENT_SYNC_COMMITTEE_INDEX: u64 = 22;
 pub const CURRENT_SYNC_COMMITTEE_DEPTH: u64 = 5;

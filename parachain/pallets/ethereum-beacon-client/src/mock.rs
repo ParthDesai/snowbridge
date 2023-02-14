@@ -1,4 +1,5 @@
 use super::*;
+use crate as ethereum_beacon_client;
 use frame_support::parameter_types;
 use frame_system as system;
 use pallet_timestamp;
@@ -122,7 +123,7 @@ pub mod mock_mainnet {
     }
 }
 
-pub mod mock_goerli_testnet {
+pub mod mock_goerli {
     use super::*;
 
     type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
@@ -288,13 +289,6 @@ fn sync_committee_update_from_file<T: Config>(
     serde_json::from_reader(File::open(&filepath).unwrap()).unwrap()
 }
 
-fn finalized_header_update_from_file<T: Config>(
-    name: &str,
-) -> FinalizedHeaderUpdate<T::MaxSignatureSize, T::MaxProofBranchSize, T::MaxSyncCommitteeSize> {
-    let filepath = fixture_path(name);
-    serde_json::from_reader(File::open(&filepath).unwrap()).unwrap()
-}
-
 fn block_update_from_file<T: Config>(
     name: &str,
 ) -> BlockUpdate<
@@ -324,8 +318,8 @@ fn attester_slashing_from_file<T: Config>(
 }
 
 fn add_file_prefix(name: &str) -> String {
-    let prefix = match config::IS_MINIMAL {
-        true => "minimal_",
+    let prefix = match config::IS_MAINNET {
+        true => "mainnet_",
         false => "goerli_",
     };
 
