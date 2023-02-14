@@ -11,7 +11,7 @@ use sp_std::vec;
 
 pub fn initial_sync<SyncCommitteeSize: Get<u32>, ProofSize: Get<u32>>(
 ) -> InitialSync<SyncCommitteeSize, ProofSize> {
-	if config::IS_MINIMAL {
+	if !config::IS_MAINNET {
 		return InitialSync{
             header: BeaconHeader{
                 slot: 16,
@@ -608,7 +608,7 @@ pub fn sync_committee_update<
 	ProofSize: Get<u32>,
 	SyncCommitteeSize: Get<u32>,
 >() -> SyncCommitteePeriodUpdate<SignatureSize, ProofSize, SyncCommitteeSize> {
-	if config::IS_MINIMAL {
+	if !config::IS_MAINNET {
 		return SyncCommitteePeriodUpdate {
             attested_header: BeaconHeader {
                 slot: 80,
@@ -1240,73 +1240,6 @@ pub fn sync_committee_update<
 	}
 }
 
-pub fn finalized_header_update<
-	SignatureSize: Get<u32>,
-	ProofSize: Get<u32>,
-	SyncCommitteeSize: Get<u32>,
->() -> FinalizedHeaderUpdate<SignatureSize, ProofSize, SyncCommitteeSize> {
-	if config::IS_MINIMAL {
-		return FinalizedHeaderUpdate{
-            attested_header: BeaconHeader{
-                slot: 104,
-                proposer_index: 7,
-                parent_root: hex!("8ed318fbbad1e9c82405ced0caad53f957a9e85e6d992d38029d6456796b6616").into(),
-                state_root: hex!("056f3e56d4de4a81ac360a8e2e26c6d4bb3a7e1aa3a9e3134e143e2ed47bf140").into(),
-                body_root: hex!("cdd2e91b57ad652b1a92bba4fb2b7169b18940c74a29c3ed6ffda5625c4c1679").into(),
-            },
-	        finalized_header: BeaconHeader{
-                slot: 88,
-                proposer_index: 3,
-                parent_root: hex!("03fe2f7ea47b2f99de47640391423be25a32c0e1a9747fd28b0278bfd855f0cc").into(),
-                state_root: hex!("7050b0bc9e8b7c44f2d9a4778c33f590242245db7078437d43068bf72ea75d55").into(),
-                body_root: hex!("6d816397710a3a8c23f79d475c1085811a2398ddc906bbacf6bc82ca09eeee78").into(),
-            },
-	        finality_branch: vec![
-                hex!("0b00000000000000000000000000000000000000000000000000000000000000").into(),
-                hex!("10c726fac935bf9657cc7476d3cfa7bedec5983dcfb59e8a7df6d0a619e108d7").into(),
-                hex!("d3dcb1f293e906fc339a96cada5c25cb26d692e9f2df3cbdf20f3790a4ab9067").into(),
-                hex!("566cdf50bcbdb35d5043a315598baad7597d765331ff2d92bcc1f17aa45d48a6").into(),
-                hex!("3ff7eccb38997f778c6ef44254937763bbc56afbafe517a292efa9990a063330").into(),
-                hex!("281bece9b2c38d77b38f92c6c30a95936387252e658eb34eb49ec39b83bd6235").into(),
-            ].try_into().expect("too many branch proof items"),
-	        sync_aggregate: SyncAggregate{
-                sync_committee_bits: hex!("ffffffff").to_vec().try_into().expect("too many sync committee bits"),
-                sync_committee_signature: hex!("8651ddd6e0da54ce90c4fa1d6e43d510a0958b5aaf752cd567b68cf23181dd253a8e7c79e371f16c120a723fabc5f6fc0b82d0da6c88a9a041407f405b8bae023262a0e392a64bcba170f254b07c335b2f380e6c487022b11eb809513e8a8cef").to_vec().try_into().expect("signature too long"),
-            },
-	        signature_slot: 105,
-        };
-	}
-	return FinalizedHeaderUpdate{
-        attested_header: BeaconHeader{
-            slot: 4485282,
-            proposer_index: 214594,
-            parent_root: hex!("87cde56b77933809b4dd5ed94dc0bee65022c58fcb0c9f66a73ba25266d4be02").into(),
-            state_root: hex!("ae65ffd9e692e21577b3230a15b3496126459c48f114da3c90d5f4f2f384bb6c").into(),
-            body_root: hex!("2ce5991e2b4fb97c0cdee0c2b9181718dce8ac7088d2b960d803fe1e5b8410fb").into(),
-        },
-        finalized_header: BeaconHeader{
-            slot: 4485216,
-            proposer_index: 206238,
-            parent_root: hex!("450f29e947878f7c863d97881f81b7ea474c5fed94d121556039c485249973a4").into(),
-            state_root: hex!("93e7314c0131ccca9f917dec41e04832f36a5dd287919be6d8566a712aa3072c").into(),
-            body_root: hex!("485a0a3cd8d4c854b8eff39cc8b74ae1ce4487578ee40c0d0f706b0382d6e5ff").into(),
-        },
-        finality_branch: vec![
-            hex!("8323020000000000000000000000000000000000000000000000000000000000").into(),
-            hex!("3e506c3db25d67a9366046f6c5cca30d63b120aaaacf43c50b597c3f3b8a3fcd").into(),
-            hex!("ead30bf6ac2e74806da4fd3887fcf8e91f45cb67a9e26305454e0324ca519def").into(),
-            hex!("b16033261796f3088e75b5246cc653fc09355735c5eb2ce8d7ae69a31b184444").into(),
-            hex!("2ad0e2710728b77d483b84269f21493474452b426e163e89c7fe292f19693ce3").into(),
-            hex!("a5bb29267c0eee38693a281e536bce80353345a342ceaea737666311a16d2a2c").into(),
-        ].try_into().expect("too many branch proof items"),
-        sync_aggregate: SyncAggregate{
-            sync_committee_bits: hex!("febd2fffeffffffff7ff77f7ffffffdffdfffffffcfebfdeffb7fffdfff7fffffdfffedfcfff57f7bfffdfffbffeffdffffffdbf6defffff7fffefefeff5df7f").to_vec().try_into().expect("too many sync committee bits"),
-            sync_committee_signature: hex!("a01b52a2122521ec16be5586826d5dc009e32b02b6fc9c162a0b9c84b5ba24d1887feceb4b368edeff6806f57d0b5c1f18887834257628a017df8ce4cba6301945a13052cd1c50c1cd865dfa2ea01285a5a731d9a298992927f8a43c6b1243ac").to_vec().try_into().expect("signature too long"),
-        },
-        signature_slot: 4485283
-    };
-}
-
 pub fn block_update<
 	FeeRecipientSize: Get<u32>,
 	LogsBloomSize: Get<u32>,
@@ -1336,7 +1269,7 @@ pub fn block_update<
 	ValidatorCommitteeSize,
 	SyncCommitteeSize,
 > {
-	if config::IS_MINIMAL {
+	if !config::IS_MAINNET {
 		return BlockUpdate{
             block: BeaconBlock{
                 slot: 87,
