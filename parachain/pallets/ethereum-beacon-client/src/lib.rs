@@ -112,6 +112,8 @@ pub mod pallet {
 		type ForkVersions: Get<ForkVersions>;
 		#[pallet::constant]
 		type SyncCommitteePruneThreshold: Get<u64>;
+		#[pallet::constant]
+		type ExecutionHeadersPruneThreshold: Get<u64>;
 		type WeightInfo: WeightInfo;
 		type WeakSubjectivityPeriodSeconds: Get<u32>;
 	}
@@ -158,10 +160,13 @@ pub mod pallet {
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
-	// TODO: manage storage
 	#[pallet::storage]
 	pub(super) type ExecutionHeaders<T: Config> =
-		StorageMap<_, Identity, H256, ExecutionHeaderOf<T>, OptionQuery>;
+		CountedStorageMap<_, Identity, H256, ExecutionHeaderOf<T>, OptionQuery>;
+
+	#[pallet::storage]
+	pub(super) type ExecutionHeadersMapping<T: Config> =
+		StorageMap<_, Identity, u64, H256, ValueQuery>;
 
 	/// Historical sync committees till the sync committee of latest finalized header.
 	#[pallet::storage]
@@ -481,7 +486,7 @@ pub mod pallet {
 				let highest_period_to_remove = latest_sync_committee_period - threshold;
 				let number_of_sync_committees_to_remove = stored_sync_committees as u64 - threshold;
 
-				let mut current_sync_committee_to_remove = highest_period_to_remove; // 2127
+				let mut current_sync_committee_to_remove = highest_period_to_remove;
 				while current_sync_committee_to_remove > (highest_period_to_remove - number_of_sync_committees_to_remove) {
 					<SyncCommittees<T>>::remove(current_sync_committee_to_remove);
 					current_sync_committee_to_remove -= 1;
@@ -815,6 +820,21 @@ pub mod pallet {
 			Self::deposit_event(Event::BeaconHeaderImported { block_hash: block_root, slot });
 		}
 
+		fn prune_older_execution_headers() {
+			let threshold = T::ExecutionHeadersPruneThreshold::get();
+			let stored_execution_headers = <ExecutionHeaders<T>>::count() as u64;
+
+			if stored_execution_headers as u64 > threshold {
+				let mut current_execution_header_to_delete = threshold + 1;
+				while current_execution_header_to_delete <= stored_execution_headers {
+					let execution_header_hash = <ExecutionHeadersMapping<T>>::get(current_execution_header_to_delete);
+					<ExecutionHeadersMapping<T>>::remove(current_execution_header_to_delete);
+					<ExecutionHeaders<T>>::remove(execution_header_hash);
+					current_execution_header_to_delete += 1;
+				}
+			}
+		}
+
 		fn store_execution_header(
 			block_hash: H256,
 			header: ExecutionHeaderOf<T>,
@@ -824,6 +844,8 @@ pub mod pallet {
 			let block_number = header.block_number;
 
 			<ExecutionHeaders<T>>::insert(block_hash, header);
+			<ExecutionHeadersMapping<T>>::insert(<ExecutionHeaders<T>>::count() as u64 + 1, block_hash);
+			Self::prune_older_execution_headers();
 
 			let mut execution_header_state = <LatestExecutionHeaderState<T>>::get();
 
