@@ -1,7 +1,7 @@
 use frame_support::{assert_err, assert_ok};
 use hex_literal::hex;
 use snowbridge_beacon_primitives::BeaconHeader;
-use crate::merkleization;
+use crate::{config, merkleization};
 use crate::merkleization::MerkleizationError;
 use crate::mock::new_tester;
 use crate as ethereum_beacon_client;
@@ -300,7 +300,7 @@ pub fn test_bls_fast_aggregate_verify_invalid_signature() {
 
 pub fn sync_committee_participation_is_supermajority(bits: Vec<u8>) {
 	let sync_committee_bits = merkleization::get_sync_committee_bits::<
-		mock_mainnet::MaxSyncCommitteeSize,
+		config::MaxSyncCommitteeSize,
 	>(bits.try_into().expect("too many sync committee bits"));
 
 	assert_ok!(&sync_committee_bits);
@@ -324,7 +324,7 @@ pub fn test_sync_committee_participation_is_supermajority() {
 
 pub fn sync_committee_bits_too_short(bits: Vec<u8>) {
 	let sync_committee_bits = merkleization::get_sync_committee_bits::<
-		mock_mainnet::MaxSyncCommitteeSize,
+		config::MaxSyncCommitteeSize,
 	>(bits.try_into().expect("invalid sync committee bits"));
 
 	assert_err!(
@@ -345,7 +345,7 @@ pub fn test_sync_committee_bits_too_short() {
 
 pub fn sync_committee_bits_extra_input(bits: Vec<u8>) {
 	let sync_committee_bits = merkleization::get_sync_committee_bits::<
-		mock_mainnet::MaxSyncCommitteeSize,
+		config::MaxSyncCommitteeSize,
 	>(bits.try_into().expect("invalid sync committee bits"));
 
 	assert_err!(
@@ -503,7 +503,7 @@ pub fn test_hash_eth1_data() {
 }
 
 
-pub fn hash_sync_aggregate(sync_aggregate: SyncAggregate<mock_mainnet::MaxSyncCommitteeSize, mock_mainnet::MaxSignatureSize>,
+pub fn hash_sync_aggregate(sync_aggregate: SyncAggregate<config::MaxSyncCommitteeSize, config::MaxSignatureSize>,
 						   expected_hash_root: H256) {
 	let payload: Result<SSZSyncAggregate, MerkleizationError> = sync_aggregate.try_into();
 	assert_ok!(&payload);
@@ -546,7 +546,7 @@ pub fn test_hash_sync_signature() {
 #[test]
 pub fn test_hash_tree_root_execution_payload() {
 	let payload: Result<SSZExecutionPayload, MerkleizationError> =
-		ExecutionPayload::<mock_mainnet::MaxFeeRecipientSize, mock_mainnet::MaxLogsBloomSize, mock_mainnet::MaxExtraDataSize>{
+		ExecutionPayload::<config::MaxFeeRecipientSize, config::MaxLogsBloomSize, config::MaxExtraDataSize>{
 			parent_hash: hex!("eadee5ab098dde64e9fd02ae5858064bad67064070679625b09f8d82dec183f7").into(),
 			fee_recipient: hex!("f97e180c050e5ab072211ad2c213eb5aee4df134").to_vec().try_into().expect("fee recipient bits are too long"),
 			state_root: hex!("564fa064c2a324c2b5978d7fdfc5d4224d4f421a45388af1ed405a399c845dff").into(),
@@ -574,7 +574,7 @@ pub fn test_hash_tree_root_execution_payload() {
 #[test]
 pub fn test_hash_tree_root_attestation() {
 	let payload: Result<SSZAttestation, MerkleizationError> =
-		Attestation::<mock_mainnet::MaxValidatorsPerCommittee, mock_mainnet::MaxSignatureSize>{
+		Attestation::<config::MaxValidatorsPerCommittee, config::MaxSignatureSize>{
 			aggregation_bits: hex!("ffcffeff7ffffffffefbf7ffffffdff73e").to_vec().try_into().expect("aggregation bits are too long"),
 			data: AttestationData{
 				slot: 484119,
@@ -658,7 +658,7 @@ pub fn test_hash_tree_root_checkpoint() {
 #[test]
 pub fn test_hash_tree_root_attester_slashing() {
 	let payload: Result<SSZAttesterSlashing, MerkleizationError> =
-		get_attester_slashing::<mock_mainnet::Test>().try_into();
+		get_attester_slashing().try_into();
 
 	assert_ok!(&payload);
 
@@ -677,7 +677,7 @@ mod beacon_tests {
 	use hex_literal::hex;
 	use snowbridge_beacon_primitives::FinalizedHeaderState;
 	use sp_core::H256;
-	use crate::merkleization;
+	use crate::{config, merkleization};
 	use crate::merkleization::MerkleizationError;
 	use crate::mock::{get_bls_signature_verify_test_data, get_committee_sync_period_update, get_finalized_header_update, get_header_update, get_initial_sync, get_validators_root, mock_mainnet as mock, new_tester};
 	use crate::pallet::{ExecutionHeaders, LatestFinalizedHeaderState, SyncCommittees, ValidatorsRoot, Error};
@@ -685,7 +685,7 @@ mod beacon_tests {
 
 	#[test]
 	fn it_syncs_from_an_initial_checkpoint() {
-		let initial_sync = get_initial_sync::<mock::Test>();
+		let initial_sync = get_initial_sync();
 
 		new_tester::<mock::Test>().execute_with(|| {
 			assert_ok!(mock::EthereumBeaconClient::initial_sync(initial_sync.clone()));
@@ -702,10 +702,10 @@ mod beacon_tests {
 
 	#[test]
 	fn it_updates_a_committee_period_sync_update() {
-		let initial_sync = get_initial_sync::<mock::Test>();
-		let update = get_committee_sync_period_update::<mock::Test>("");
-		let second_update = get_committee_sync_period_update::<mock::Test>("_second");
-		let third_update = get_committee_sync_period_update::<mock::Test>("_third");
+		let initial_sync = get_initial_sync();
+		let update = get_committee_sync_period_update("");
+		let second_update = get_committee_sync_period_update("_second");
+		let third_update = get_committee_sync_period_update("_third");
 
 
 		let current_period = mock::EthereumBeaconClient::compute_sync_committee_period(
@@ -763,9 +763,9 @@ mod beacon_tests {
 
 	#[test]
 	fn it_processes_a_finalized_header_update() {
-		let update = get_finalized_header_update::<mock::Test>();
+		let update = get_finalized_header_update();
 
-		let initial_sync = get_initial_sync::<mock::Test>();
+		let initial_sync = get_initial_sync();
 
 		new_tester::<mock::Test>().execute_with(|| {
 			assert_ok!(mock::EthereumBeaconClient::initial_sync(initial_sync.clone()));
@@ -787,17 +787,17 @@ mod beacon_tests {
 
 	#[test]
 	fn it_processes_a_header_update() {
-		let update = get_header_update::<mock::Test>();
+		let update = get_header_update();
 
 		let current_sync_committee =
-			get_initial_sync::<mock::Test>().current_sync_committee;
+			get_initial_sync().current_sync_committee;
 
 		let current_period =
 			mock::EthereumBeaconClient::compute_sync_committee_period(update.block.slot);
 
 		new_tester::<mock::Test>().execute_with(|| {
 			SyncCommittees::<mock::Test>::insert(current_period, current_sync_committee);
-			ValidatorsRoot::<mock::Test>::set(get_validators_root::<mock::Test>());
+			ValidatorsRoot::<mock::Test>::set(get_validators_root());
 			LatestFinalizedHeaderState::<mock::Test>::set(FinalizedHeaderState {
 				beacon_block_root: H256::default(),
 				beacon_block_header: Default::default(),
@@ -819,7 +819,7 @@ mod beacon_tests {
 
 	#[test]
 	fn it_errors_when_importing_a_header_with_no_sync_committee_for_period() {
-		let update = get_finalized_header_update::<mock::Test>();
+		let update = get_finalized_header_update();
 
 		new_tester::<mock::Test>().execute_with(|| {
 			ValidatorsRoot::<mock::Test>::set(
@@ -838,7 +838,7 @@ mod beacon_tests {
 
 	#[test]
 	pub fn test_hash_tree_root_sync_committee() {
-		let sync_committee = get_committee_sync_period_update::<mock::Test>("");
+		let sync_committee = get_committee_sync_period_update("");
 		let hash_root_result =
 			merkleization::hash_tree_root_sync_committee(&sync_committee.next_sync_committee);
 		assert_ok!(&hash_root_result);
@@ -852,7 +852,7 @@ mod beacon_tests {
 
 	#[test]
 	pub fn test_hash_block_body() {
-		let block_update = get_header_update::<mock::Test>();
+		let block_update = get_header_update();
 		let payload: Result<SSZBeaconBlockBody, MerkleizationError> =
 			block_update.block.body.try_into();
 		assert_ok!(&payload);
@@ -869,10 +869,10 @@ mod beacon_tests {
 
 	#[test]
 	pub fn test_bls_fast_aggregate_verify() {
-		let test_data = get_bls_signature_verify_test_data::<mock::Test>();
+		let test_data = get_bls_signature_verify_test_data();
 
 		let sync_committee_bits =
-			merkleization::get_sync_committee_bits::<mock::MaxSyncCommitteeSize>(
+			merkleization::get_sync_committee_bits::<config::MaxSyncCommitteeSize>(
 				test_data.sync_committee_bits.try_into().expect("too many sync committee bits"),
 			);
 
@@ -896,7 +896,7 @@ mod beacon_tests {
 	use hex_literal::hex;
 	use snowbridge_beacon_primitives::{BeaconHeader, FinalizedHeaderState};
 	use sp_core::H256;
-	use crate::merkleization;
+	use crate::{config, merkleization};
 	use crate::merkleization::MerkleizationError;
 	use crate::mock::{get_bls_signature_verify_test_data, get_committee_sync_period_update, get_finalized_header_update, get_header_update, get_initial_sync, get_validators_root, mock_goerli as mock, mock_goerli, new_tester};
 	use crate::pallet::{ExecutionHeaders, LatestFinalizedHeaderState, SyncCommittees, ValidatorsRoot};
@@ -904,7 +904,7 @@ mod beacon_tests {
 
 	#[test]
 	fn it_syncs_from_an_initial_checkpoint() {
-		let initial_sync = get_initial_sync::<mock::Test>();
+		let initial_sync = get_initial_sync();
 
 		new_tester::<mock::Test>().execute_with(|| {
 			assert_ok!(mock_goerli::EthereumBeaconClient::initial_sync(initial_sync.clone()));
@@ -921,9 +921,9 @@ mod beacon_tests {
 
 	#[test]
 	fn it_updates_a_committee_period_sync_update() {
-		let initial_sync = get_initial_sync::<mock::Test>();
-		let update = get_committee_sync_period_update::<mock::Test>("");
-		let next_update = get_committee_sync_period_update::<mock::Test>("_next");
+		let initial_sync = get_initial_sync();
+		let update = get_committee_sync_period_update("");
+		let next_update = get_committee_sync_period_update("_next");
 
 		let current_period = mock::EthereumBeaconClient::compute_sync_committee_period(
 			update.attested_header.slot,
@@ -972,9 +972,9 @@ mod beacon_tests {
 
 	#[test]
 	fn it_processes_a_finalized_header_update() {
-		let update = get_finalized_header_update::<mock::Test>();
+		let update = get_finalized_header_update();
 
-		let initial_sync = get_initial_sync::<mock::Test>();
+		let initial_sync = get_initial_sync();
 
 		new_tester::<mock::Test>().execute_with(|| {
 			assert_ok!(mock::EthereumBeaconClient::initial_sync(initial_sync.clone()));
@@ -996,17 +996,17 @@ mod beacon_tests {
 
 	#[test]
 	fn it_processes_a_header_update() {
-		let update = get_header_update::<mock::Test>();
+		let update = get_header_update();
 
 		let current_sync_committee =
-			get_initial_sync::<mock::Test>().current_sync_committee;
+			get_initial_sync().current_sync_committee;
 
 		let current_period =
 			mock::EthereumBeaconClient::compute_sync_committee_period(update.block.slot);
 
 		new_tester::<mock::Test>().execute_with(|| {
 			SyncCommittees::<mock::Test>::insert(current_period, current_sync_committee);
-			ValidatorsRoot::<mock::Test>::set(get_validators_root::<mock::Test>());
+			ValidatorsRoot::<mock::Test>::set(get_validators_root());
 			LatestFinalizedHeaderState::<mock::Test>::set(FinalizedHeaderState {
 				beacon_block_root: H256::default(),
 				beacon_slot: update.block.slot,
@@ -1028,7 +1028,7 @@ mod beacon_tests {
 
 	#[test]
 	pub fn test_hash_tree_root_sync_committee() {
-		let sync_committee = get_committee_sync_period_update::<mock::Test>("");
+		let sync_committee = get_committee_sync_period_update("");
 		let hash_root_result =
 			merkleization::hash_tree_root_sync_committee(&sync_committee.next_sync_committee);
 		assert_ok!(&hash_root_result);
@@ -1042,10 +1042,10 @@ mod beacon_tests {
 
 	#[test]
 	pub fn test_bls_fast_aggregate_verify() {
-		let test_data = get_bls_signature_verify_test_data::<mock::Test>();
+		let test_data = get_bls_signature_verify_test_data();
 
 		let sync_committee_bits =
-			merkleization::get_sync_committee_bits::<mock::MaxSyncCommitteeSize>(
+			merkleization::get_sync_committee_bits::<config::MaxSyncCommitteeSize>(
 				test_data.sync_committee_bits.try_into().expect("too many sync committee bits"),
 			);
 
@@ -1063,7 +1063,7 @@ mod beacon_tests {
 
 	#[test]
 	pub fn test_hash_block_body() {
-		let block_update = get_header_update::<mock::Test>();
+		let block_update = get_header_update();
 		let payload: Result<SSZBeaconBlockBody, MerkleizationError> =
 			block_update.block.body.try_into();
 		assert_ok!(&payload);

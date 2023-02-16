@@ -1,5 +1,5 @@
 use super::*;
-
+use crate::config;
 use crate::Pallet as EthereumBeaconClient;
 use frame_benchmarking::{benchmarks, impl_benchmark_test_suite, whitelisted_caller};
 use frame_system::RawOrigin;
@@ -25,7 +25,7 @@ benchmarks! {
 
 		EthereumBeaconClient::<T>::initial_sync(data::initial_sync()).unwrap();
 
-		let sync_update: SyncCommitteePeriodUpdate<T::MaxSignatureSize, T::MaxProofBranchSize, T::MaxSyncCommitteeSize> = data::sync_committee_update();
+		let sync_update: SyncCommitteePeriodUpdate<config::MaxSignatureSize, config::MaxProofBranchSize, config::MaxSyncCommitteeSize> = data::sync_committee_update();
 		SyncCommittees::<T>::set(sync_update.sync_committee_period+1, sync_update.next_sync_committee);
 
 		let block_update = data::block_update();
@@ -42,6 +42,8 @@ benchmarks! {
 
 		<ExecutionHeaders<T>>::get(block_hash).unwrap();
 	}
+
+
 }
 
 impl_benchmark_test_suite!(

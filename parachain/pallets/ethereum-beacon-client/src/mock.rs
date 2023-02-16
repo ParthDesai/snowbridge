@@ -69,33 +69,20 @@ pub mod mock_mainnet {
     }
 
     parameter_types! {
-		pub const MaxSyncCommitteeSize: u32 = config::SYNC_COMMITTEE_SIZE as u32;
-		pub const MaxProofBranchSize: u32 = 6;
-		pub const MaxExtraDataSize: u32 = config::MAX_EXTRA_DATA_BYTES as u32;
-		pub const MaxLogsBloomSize: u32 = config::MAX_LOGS_BLOOM_SIZE as u32;
-		pub const MaxFeeRecipientSize: u32 = config::MAX_FEE_RECIPIENT_SIZE as u32;
-		pub const MaxDepositDataSize: u32 = config::MAX_DEPOSITS as u32;
-		pub const MaxPublicKeySize: u32 = config::PUBKEY_SIZE as u32;
-		pub const MaxSignatureSize: u32 = config::SIGNATURE_SIZE as u32;
-		pub const MaxProposerSlashingSize: u32 = config::MAX_PROPOSER_SLASHINGS as u32;
-		pub const MaxAttesterSlashingSize: u32 = config::MAX_ATTESTER_SLASHINGS as u32;
-		pub const MaxVoluntaryExitSize: u32 = config::MAX_VOLUNTARY_EXITS as u32;
-		pub const MaxAttestationSize: u32 = config::MAX_ATTESTATIONS as u32;
-		pub const MaxValidatorsPerCommittee: u32 = config::MAX_VALIDATORS_PER_COMMITTEE as u32;
 		pub const WeakSubjectivityPeriodSeconds: u32 = 97200;
 		pub const SyncCommitteePruneThreshold: u32 = 10;
         pub const ExecutionHeadersPruneThreshold: u32 = 64;
 		pub const ChainForkVersions: ForkVersions = ForkVersions{
 			genesis: Fork {
-				version: [0, 0, 0, 0], // 0x00001020
+				version: [0, 0, 0, 0], // 0x00000000
 				epoch: 0,
 			},
 			altair: Fork {
-				version: [1, 0, 0, 0], // 0x01001020
+				version: [1, 0, 0, 0], // 0x01000000
 				epoch: 36660,
 			},
 			bellatrix: Fork {
-				version: [2, 0, 0, 0], // 0x02001020
+				version: [2, 0, 0, 0], // 0x02000000
 				epoch: 112260,
 			},
 		};
@@ -104,19 +91,6 @@ pub mod mock_mainnet {
     impl ethereum_beacon_client::Config for Test {
         type TimeProvider = pallet_timestamp::Pallet<Test>;
         type RuntimeEvent = RuntimeEvent;
-        type MaxSyncCommitteeSize = MaxSyncCommitteeSize;
-        type MaxProofBranchSize = MaxProofBranchSize;
-        type MaxExtraDataSize = MaxExtraDataSize;
-        type MaxLogsBloomSize = MaxLogsBloomSize;
-        type MaxFeeRecipientSize = MaxFeeRecipientSize;
-        type MaxDepositDataSize = MaxDepositDataSize;
-        type MaxPublicKeySize = MaxPublicKeySize;
-        type MaxSignatureSize = MaxSignatureSize;
-        type MaxProposerSlashingSize = MaxProposerSlashingSize;
-        type MaxAttesterSlashingSize = MaxAttesterSlashingSize;
-        type MaxVoluntaryExitSize = MaxVoluntaryExitSize;
-        type MaxAttestationSize = MaxAttestationSize;
-        type MaxValidatorsPerCommittee = MaxValidatorsPerCommittee;
         type ForkVersions = ChainForkVersions;
         type WeakSubjectivityPeriodSeconds = WeakSubjectivityPeriodSeconds;
         type WeightInfo = ();
@@ -183,19 +157,6 @@ pub mod mock_goerli {
     }
 
     parameter_types! {
-		pub const MaxSyncCommitteeSize: u32 = config::SYNC_COMMITTEE_SIZE as u32;
-		pub const MaxProofBranchSize: u32 = 6;
-		pub const MaxExtraDataSize: u32 = config::MAX_EXTRA_DATA_BYTES as u32;
-		pub const MaxLogsBloomSize: u32 = config::MAX_LOGS_BLOOM_SIZE as u32;
-		pub const MaxFeeRecipientSize: u32 = config::MAX_FEE_RECIPIENT_SIZE as u32;
-		pub const MaxDepositDataSize: u32 = config::MAX_DEPOSITS as u32;
-		pub const MaxPublicKeySize: u32 = config::PUBKEY_SIZE as u32;
-		pub const MaxSignatureSize: u32 = config::SIGNATURE_SIZE as u32;
-		pub const MaxProposerSlashingSize: u32 = config::MAX_PROPOSER_SLASHINGS as u32;
-		pub const MaxAttesterSlashingSize: u32 = config::MAX_ATTESTER_SLASHINGS as u32;
-		pub const MaxVoluntaryExitSize: u32 = config::MAX_VOLUNTARY_EXITS as u32;
-		pub const MaxAttestationSize: u32 = config::MAX_ATTESTATIONS as u32;
-		pub const MaxValidatorsPerCommittee: u32 = config::MAX_VALIDATORS_PER_COMMITTEE as u32;
 		pub const WeakSubjectivityPeriodSeconds: u32 = 97200;
 		pub const SyncCommitteePruneThreshold: u32 = 10;
         pub const ExecutionHeadersPruneThreshold: u32 = 64;
@@ -219,19 +180,6 @@ pub mod mock_goerli {
     impl Config for Test {
         type RuntimeEvent = RuntimeEvent;
         type TimeProvider = pallet_timestamp::Pallet<Test>;
-        type MaxSyncCommitteeSize = MaxSyncCommitteeSize;
-        type MaxProofBranchSize = MaxProofBranchSize;
-        type MaxExtraDataSize = MaxExtraDataSize;
-        type MaxLogsBloomSize = MaxLogsBloomSize;
-        type MaxFeeRecipientSize = MaxFeeRecipientSize;
-        type MaxDepositDataSize = MaxDepositDataSize;
-        type MaxPublicKeySize = MaxPublicKeySize;
-        type MaxSignatureSize = MaxSignatureSize;
-        type MaxProposerSlashingSize = MaxProposerSlashingSize;
-        type MaxAttesterSlashingSize = MaxAttesterSlashingSize;
-        type MaxVoluntaryExitSize = MaxVoluntaryExitSize;
-        type MaxAttestationSize = MaxAttestationSize;
-        type MaxValidatorsPerCommittee = MaxValidatorsPerCommittee;
         type ForkVersions = ChainForkVersions;
         type WeakSubjectivityPeriodSeconds = WeakSubjectivityPeriodSeconds;
         type WeightInfo = ();
@@ -246,21 +194,21 @@ pub fn new_tester<T: Config>() -> sp_io::TestExternalities {
 }
 
 #[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
-pub struct BlockBodyTest<T: Config> {
+pub struct BlockBodyTest {
     pub body: Body<
-        T::MaxFeeRecipientSize,
-        T::MaxLogsBloomSize,
-        T::MaxExtraDataSize,
-        T::MaxDepositDataSize,
-        T::MaxPublicKeySize,
-        T::MaxSignatureSize,
-        T::MaxProofBranchSize,
-        T::MaxProposerSlashingSize,
-        T::MaxAttesterSlashingSize,
-        T::MaxVoluntaryExitSize,
-        T::MaxAttestationSize,
-        T::MaxValidatorsPerCommittee,
-        T::MaxSyncCommitteeSize,
+        config::MaxFeeRecipientSize,
+        config::MaxLogsBloomSize,
+        config::MaxExtraDataSize,
+        config::MaxDepositDataSize,
+        config::MaxPublicKeySize,
+        config::MaxSignatureSize,
+        config::MaxProofBranchSize,
+        config::MaxProposerSlashingSize,
+        config::MaxAttesterSlashingSize,
+        config::MaxVoluntaryExitSize,
+        config::MaxAttestationSize,
+        config::MaxValidatorsPerCommittee,
+        config::MaxSyncCommitteeSize,
     >,
     pub result: H256,
 }
@@ -278,45 +226,45 @@ fn fixture_path(name: &str) -> PathBuf {
     [env!("CARGO_MANIFEST_DIR"), "tests", "fixtures", name].iter().collect()
 }
 
-fn initial_sync_from_file<T: Config>(
+fn initial_sync_from_file(
     name: &str,
-) -> InitialSync<T::MaxSyncCommitteeSize, T::MaxProofBranchSize> {
+) -> InitialSync<config::MaxSyncCommitteeSize, config::MaxProofBranchSize> {
     let filepath = fixture_path(name);
     serde_json::from_reader(File::open(&filepath).unwrap()).unwrap()
 }
 
-fn sync_committee_update_from_file<T: Config>(
+fn sync_committee_update_from_file(
     name: &str,
-) -> SyncCommitteePeriodUpdate<T::MaxSignatureSize, T::MaxProofBranchSize, T::MaxSyncCommitteeSize>
+) -> SyncCommitteePeriodUpdate<config::MaxSignatureSize, config::MaxProofBranchSize, config::MaxSyncCommitteeSize>
 {
     let filepath = fixture_path(name);
     serde_json::from_reader(File::open(&filepath).unwrap()).unwrap()
 }
 
-fn block_update_from_file<T: Config>(
+fn block_update_from_file(
     name: &str,
 ) -> BlockUpdate<
-    T::MaxFeeRecipientSize,
-    T::MaxLogsBloomSize,
-    T::MaxExtraDataSize,
-    T::MaxDepositDataSize,
-    T::MaxPublicKeySize,
-    T::MaxSignatureSize,
-    T::MaxProofBranchSize,
-    T::MaxProposerSlashingSize,
-    T::MaxAttesterSlashingSize,
-    T::MaxVoluntaryExitSize,
-    T::MaxAttestationSize,
-    T::MaxValidatorsPerCommittee,
-    T::MaxSyncCommitteeSize,
+    config::MaxFeeRecipientSize,
+    config::MaxLogsBloomSize,
+    config::MaxExtraDataSize,
+    config::MaxDepositDataSize,
+    config::MaxPublicKeySize,
+    config::MaxSignatureSize,
+    config::MaxProofBranchSize,
+    config::MaxProposerSlashingSize,
+    config::MaxAttesterSlashingSize,
+    config::MaxVoluntaryExitSize,
+    config::MaxAttestationSize,
+    config::MaxValidatorsPerCommittee,
+    config::MaxSyncCommitteeSize,
 > {
     let filepath = fixture_path(name);
     serde_json::from_reader(File::open(&filepath).unwrap()).unwrap()
 }
 
-fn attester_slashing_from_file<T: Config>(
+fn attester_slashing_from_file(
     name: &str,
-) -> AttesterSlashing<T::MaxValidatorsPerCommittee, T::MaxSignatureSize> {
+) -> AttesterSlashing<config::MaxValidatorsPerCommittee, config::MaxSignatureSize> {
     let filepath = fixture_path(name);
     serde_json::from_reader(File::open(&filepath).unwrap()).unwrap()
 }
@@ -332,47 +280,47 @@ fn add_file_prefix(name: &str) -> String {
     result
 }
 
-pub fn get_initial_sync<T: Config>(
-) -> InitialSync<T::MaxSyncCommitteeSize, T::MaxProofBranchSize> {
-    initial_sync_from_file::<T>(&add_file_prefix("initial_sync.json"))
+pub fn get_initial_sync(
+) -> InitialSync<config::MaxSyncCommitteeSize, config::MaxProofBranchSize> {
+    initial_sync_from_file(&add_file_prefix("initial_sync.json"))
 }
 
-pub fn get_committee_sync_period_update<T: Config>(suffix: &str)
-                                                   -> SyncCommitteePeriodUpdate<T::MaxSignatureSize, T::MaxProofBranchSize, T::MaxSyncCommitteeSize>
+pub fn get_committee_sync_period_update(suffix: &str)
+                                                   -> SyncCommitteePeriodUpdate<config::MaxSignatureSize, config::MaxProofBranchSize, config::MaxSyncCommitteeSize>
 {
-    sync_committee_update_from_file::<T>(&add_file_prefix(format!("sync_committee_update{}.json", suffix).as_str()))
+    sync_committee_update_from_file(&add_file_prefix(format!("sync_committee_update{}.json", suffix).as_str()))
 }
 
-pub fn get_header_update<T: Config>() -> BlockUpdate<
-    T::MaxFeeRecipientSize,
-    T::MaxLogsBloomSize,
-    T::MaxExtraDataSize,
-    T::MaxDepositDataSize,
-    T::MaxPublicKeySize,
-    T::MaxSignatureSize,
-    T::MaxProofBranchSize,
-    T::MaxProposerSlashingSize,
-    T::MaxAttesterSlashingSize,
-    T::MaxVoluntaryExitSize,
-    T::MaxAttestationSize,
-    T::MaxValidatorsPerCommittee,
-    T::MaxSyncCommitteeSize,
+pub fn get_header_update() -> BlockUpdate<
+    config::MaxFeeRecipientSize,
+    config::MaxLogsBloomSize,
+    config::MaxExtraDataSize,
+    config::MaxDepositDataSize,
+    config::MaxPublicKeySize,
+    config::MaxSignatureSize,
+    config::MaxProofBranchSize,
+    config::MaxProposerSlashingSize,
+    config::MaxAttesterSlashingSize,
+    config::MaxVoluntaryExitSize,
+    config::MaxAttestationSize,
+    config::MaxValidatorsPerCommittee,
+    config::MaxSyncCommitteeSize,
 > {
-    block_update_from_file::<T>(&add_file_prefix("block_update.json"))
+    block_update_from_file(&add_file_prefix("block_update.json"))
 }
 
-pub fn get_finalized_header_update<T: Config>(
-) -> SyncCommitteePeriodUpdate<T::MaxSignatureSize, T::MaxProofBranchSize, T::MaxSyncCommitteeSize> {
-    sync_committee_update_from_file::<T>(&add_file_prefix("finalized_header_update.json"))
+pub fn get_finalized_header_update(
+) -> SyncCommitteePeriodUpdate<config::MaxSignatureSize, config::MaxProofBranchSize, config::MaxSyncCommitteeSize> {
+    sync_committee_update_from_file(&add_file_prefix("finalized_header_update.json"))
 }
 
-pub fn get_validators_root<T: Config>() -> H256 {
-    get_initial_sync::<T>().validators_root
+pub fn get_validators_root() -> H256 {
+    get_initial_sync().validators_root
 }
 
-pub fn get_bls_signature_verify_test_data<T: Config>() -> BLSSignatureVerifyTest {
-    let finalized_update = get_finalized_header_update::<T>();
-    let initial_sync = get_initial_sync::<T>();
+pub fn get_bls_signature_verify_test_data() -> BLSSignatureVerifyTest {
+    let finalized_update = get_finalized_header_update();
+    let initial_sync = get_initial_sync();
 
     BLSSignatureVerifyTest {
         sync_committee_bits: finalized_update
@@ -398,7 +346,7 @@ pub fn get_bls_signature_verify_test_data<T: Config>() -> BLSSignatureVerifyTest
     }
 }
 
-pub fn get_attester_slashing<T: Config>(
-) -> AttesterSlashing<T::MaxValidatorsPerCommittee, T::MaxSignatureSize> {
-    attester_slashing_from_file::<T>("attester_slashing.json")
+pub fn get_attester_slashing(
+) -> AttesterSlashing<config::MaxValidatorsPerCommittee, config::MaxSignatureSize> {
+    attester_slashing_from_file("attester_slashing.json")
 }
