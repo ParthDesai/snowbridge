@@ -5,6 +5,9 @@ pub use mainnet::*;
 
 #[cfg(not(feature = "mainnet"))]
 mod goerli;
+
+pub mod param_macro;
+
 #[cfg(not(feature = "mainnet"))]
 pub use goerli::*;
 
