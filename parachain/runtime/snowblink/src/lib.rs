@@ -555,13 +555,6 @@ use snowbridge_basic_channel::{
 	inbound as basic_channel_inbound, outbound as basic_channel_outbound,
 };
 
-impl basic_channel_inbound::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type Verifier = ethereum_beacon_client::Pallet<Runtime>;
-	type MessageDispatch = dispatch::Pallet<Runtime>;
-	type WeightInfo = ();
-}
-
 impl basic_channel_outbound::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Hashing = Keccak256;
@@ -586,41 +579,30 @@ parameter_types! {
 	pub const MaxValidatorsPerCommittee: u32 = 2048;
 	pub const WeakSubjectivityPeriodSeconds: u32 = 97200;
 	pub const SyncCommitteePruneThreshold: u32 = 10;
+	pub const ExecutionHeadersPruneThreshold: u32 = 64;
 	pub const ChainForkVersions: ForkVersions = ForkVersions{
 		genesis: Fork {
-			version: [0, 0, 16, 32], // 0x00001020
-			epoch: 0,
-		},
-		altair: Fork {
-			version: [1, 0, 16, 32], // 0x01001020
-			epoch: 36660,
-		},
-		bellatrix: Fork {
-			version: [2, 0, 16, 32], // 0x02001020
-			epoch: 112260,
-		},
+				version: [0, 0, 0, 0], // 0x00000000
+				epoch: 0,
+			},
+			altair: Fork {
+				version: [1, 0, 0, 0], // 0x01000000
+				epoch: 36660,
+			},
+			bellatrix: Fork {
+				version: [2, 0, 0, 0], // 0x02000000
+				epoch: 112260,
+			},
 	};
 }
 
 impl ethereum_beacon_client::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type TimeProvider = pallet_timestamp::Pallet<Runtime>;
-	type MaxSyncCommitteeSize = MaxSyncCommitteeSize;
-	type MaxProofBranchSize = MaxProofBranchSize;
-	type MaxExtraDataSize = MaxExtraDataSize;
-	type MaxLogsBloomSize = MaxLogsBloomSize;
-	type MaxFeeRecipientSize = MaxFeeRecipientSize;
-	type MaxDepositDataSize = MaxDepositDataSize;
-	type MaxPublicKeySize = MaxPublicKeySize;
-	type MaxSignatureSize = MaxSignatureSize;
-	type MaxProposerSlashingSize = MaxProposerSlashingSize;
-	type MaxAttesterSlashingSize = MaxAttesterSlashingSize;
-	type MaxVoluntaryExitSize = MaxVoluntaryExitSize;
-	type MaxAttestationSize = MaxAttestationSize;
-	type MaxValidatorsPerCommittee = MaxValidatorsPerCommittee;
 	type ForkVersions = ChainForkVersions;
 	type WeakSubjectivityPeriodSeconds = WeakSubjectivityPeriodSeconds;
 	type SyncCommitteePruneThreshold = SyncCommitteePruneThreshold;
+	type ExecutionHeadersPruneThreshold = ExecutionHeadersPruneThreshold;
 	type WeightInfo = ethereum_beacon_client::weights::SnowbridgeWeight<Self>;
 }
 
@@ -707,11 +689,11 @@ construct_runtime!(
 		LocalCouncilMembership: pallet_membership::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 11,
 
 		// Bridge Infrastructure
-		BasicInboundChannel: basic_channel_inbound::{Pallet, Call, Config, Storage, Event<T>} = 12,
+		
 		BasicOutboundChannel: basic_channel_outbound::{Pallet, Config<T>, Storage, Event<T>} = 13,
 		// 14 and 15 were used for the incentivized inbound and outbound channels respectively
 		Dispatch: dispatch::{Pallet, Call, Storage, Event<T>, Origin} = 16,
-		EthereumBeaconClient: ethereum_beacon_client::{Pallet, Call, Config<T>, Storage, Event<T>} = 18,
+		EthereumBeaconClient: ethereum_beacon_client::{Pallet, Call, Config, Storage, Event<T>} = 18,
 		Assets: pallet_assets::{Pallet, Call, Config<T>, Storage, Event<T>} = 19,
 		// 20 was used for the asset registry pallet
 		XcmSupport: snowbridge_xcm_support::{Pallet, Storage, Config, Event<T>} = 21,

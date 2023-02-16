@@ -604,19 +604,6 @@ parameter_types! {
 impl ethereum_beacon_client::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type TimeProvider = pallet_timestamp::Pallet<Runtime>;
-	type MaxSyncCommitteeSize = MaxSyncCommitteeSize;
-	type MaxProofBranchSize = MaxProofBranchSize;
-	type MaxExtraDataSize = MaxExtraDataSize;
-	type MaxLogsBloomSize = MaxLogsBloomSize;
-	type MaxFeeRecipientSize = MaxFeeRecipientSize;
-	type MaxDepositDataSize = MaxDepositDataSize;
-	type MaxPublicKeySize = MaxPublicKeySize;
-	type MaxSignatureSize = MaxSignatureSize;
-	type MaxProposerSlashingSize = MaxProposerSlashingSize;
-	type MaxAttesterSlashingSize = MaxAttesterSlashingSize;
-	type MaxVoluntaryExitSize = MaxVoluntaryExitSize;
-	type MaxAttestationSize = MaxAttestationSize;
-	type MaxValidatorsPerCommittee = MaxValidatorsPerCommittee;
 	type ForkVersions = ChainForkVersions;
 	type WeakSubjectivityPeriodSeconds = WeakSubjectivityPeriodSeconds;
 	type WeightInfo = ethereum_beacon_client::weights::SnowbridgeWeight<Self>;

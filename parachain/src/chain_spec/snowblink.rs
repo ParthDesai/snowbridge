@@ -91,9 +91,6 @@ fn testnet_genesis(
 			],
 			phantom: Default::default(),
 		},
-		basic_inbound_channel: snowblink_runtime::BasicInboundChannelConfig {
-			source_channel: Default::default(),
-		},
 		basic_outbound_channel: snowblink_runtime::BasicOutboundChannelConfig { interval: 1 },
 		assets: snowblink_runtime::AssetsConfig {
 			// Initialize the wrapped Ether asset
