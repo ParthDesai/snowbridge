@@ -29,24 +29,34 @@
 #![allow(unused_imports)]
 
 use frame_support::{traits::Get, weights::Weight};
+use frame_support::weights::constants::RocksDbWeight;
 use sp_std::marker::PhantomData;
 
 /// Weight functions for ethereum_beacon_client.
 pub struct SnowbridgeWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> ethereum_beacon_client::WeightInfo for SnowbridgeWeight<T> {
+	// Storage: EthereumBeaconClient Blocked (r:1 w:0)
+	// Storage: EthereumBeaconClient LatestFinalizedHeaderState (r:1 w:0)
+	// Storage: Timestamp Now (r:1 w:0)
+	// Storage: EthereumBeaconClient ValidatorsRoot (r:1 w:0)
+	// Storage: EthereumBeaconClient SyncCommittees (r:2 w:1)
+	// Storage: EthereumBeaconClient CounterForSyncCommittees (r:1 w:0)
 	fn sync_committee_period_update() -> Weight {
-		Weight::from_ref_time(48_609_506_000 as u64)
-			.saturating_add(T::DbWeight::get().reads(4))
-			.saturating_add(T::DbWeight::get().writes(2))
+		Weight::from_ref_time(129_357_000_000 as u64)
+			.saturating_add(RocksDbWeight::get().reads(7 as u64))
+			.saturating_add(RocksDbWeight::get().writes(1 as u64))
 	}
-	fn import_finalized_header() -> Weight {
-		Weight::from_ref_time(48_328_434_000 as u64)
-			.saturating_add(T::DbWeight::get().reads(3))
-			.saturating_add(T::DbWeight::get().writes(1))
-	}
+	// Storage: EthereumBeaconClient Blocked (r:1 w:0)
+	// Storage: EthereumBeaconClient LatestFinalizedHeaderState (r:1 w:0)
+	// Storage: EthereumBeaconClient SyncCommittees (r:1 w:0)
+	// Storage: EthereumBeaconClient ValidatorsRoot (r:1 w:0)
+	// Storage: EthereumBeaconClient ExecutionHeaders (r:1 w:1)
+	// Storage: EthereumBeaconClient CounterForExecutionHeaders (r:1 w:1)
+	// Storage: EthereumBeaconClient LatestExecutionHeaderState (r:1 w:1)
+	// Storage: EthereumBeaconClient ExecutionHeadersMapping (r:0 w:1)
 	fn import_execution_header() -> Weight {
-		Weight::from_ref_time(48_505_068_000 as u64)
-			.saturating_add(T::DbWeight::get().reads(3))
-			.saturating_add(T::DbWeight::get().writes(1))
+		Weight::from_ref_time(137_048_000_000 as u64)
+			.saturating_add(RocksDbWeight::get().reads(7 as u64))
+			.saturating_add(RocksDbWeight::get().writes(4 as u64))
 	}
 }

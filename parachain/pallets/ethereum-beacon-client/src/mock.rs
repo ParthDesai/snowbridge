@@ -25,7 +25,7 @@ pub mod mock_mainnet {
 		{
 			System: frame_system::{Pallet, Call, Storage, Event<T>},
 			Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent},
-			EthereumBeaconClient: ethereum_beacon_client::{Pallet, Call, Config<T>, Storage, Event<T>},
+			EthereumBeaconClient: ethereum_beacon_client::{Pallet, Call, Config, Storage, Event<T>},
 		}
 	);
 
@@ -113,7 +113,7 @@ pub mod mock_goerli {
 		{
 			System: frame_system::{Pallet, Call, Storage, Event<T>},
 			Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent},
-			EthereumBeaconClient: ethereum_beacon_client::{Pallet, Call, Config<T>, Storage, Event<T>},
+			EthereumBeaconClient: ethereum_beacon_client::{Pallet, Call, Config, Storage, Event<T>},
 		}
 	);
 

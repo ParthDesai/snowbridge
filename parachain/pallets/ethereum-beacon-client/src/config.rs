@@ -1,3 +1,5 @@
+use frame_support::parameter_types;
+
 #[cfg(feature = "mainnet")]
 mod mainnet;
 #[cfg(feature = "mainnet")]
@@ -6,14 +8,10 @@ pub use mainnet::*;
 #[cfg(not(feature = "mainnet"))]
 mod goerli;
 
-mod param_macro;
-use param_macro::*;
-
-use crate::const_parameter_types;
 #[cfg(not(feature = "mainnet"))]
 pub use goerli::*;
 
-const_parameter_types! {
+parameter_types! {
 	pub const CurrentSyncCommitteeIndex: u64 = 22;
 	pub const CurrentSyncCommitteeDepth: u64 = 5;
 	pub const MaxProofBranchSize: u32 = 6;

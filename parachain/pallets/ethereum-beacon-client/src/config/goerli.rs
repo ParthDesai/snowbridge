@@ -1,7 +1,6 @@
-use crate::const_parameter_types;
 use frame_support::parameter_types;
 
-const_parameter_types! {
+parameter_types! {
 	pub const SlotsPerEpoch: u64 = 32;
 	pub const EpochsPerSyncCommitteePeriod: u64 = 256;
 	pub const MaxSyncCommitteeSize: u32 = 512;
