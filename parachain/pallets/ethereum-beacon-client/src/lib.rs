@@ -3,11 +3,11 @@
 
 mod merkleization;
 
-pub mod weights;
-#[cfg(test)]
-mod tests;
 #[cfg(test)]
 mod mock;
+#[cfg(test)]
+mod tests;
+pub mod weights;
 
 mod ssz;
 
@@ -32,7 +32,7 @@ use sp_std::prelude::*;
 
 pub use pallet::*;
 
-pub type BlockUpdateOf= BlockUpdate<
+pub type BlockUpdateOf = BlockUpdate<
 	config::MaxFeeRecipientSize,
 	config::MaxLogsBloomSize,
 	config::MaxExtraDataSize,
@@ -47,8 +47,7 @@ pub type BlockUpdateOf= BlockUpdate<
 	config::MaxValidatorsPerCommittee,
 	config::MaxSyncCommitteeSize,
 >;
-pub type InitialSyncOf =
-	InitialSync<config::MaxSyncCommitteeSize, config::MaxProofBranchSize>;
+pub type InitialSyncOf = InitialSync<config::MaxSyncCommitteeSize, config::MaxProofBranchSize>;
 pub type SyncCommitteePeriodUpdateOf = SyncCommitteePeriodUpdate<
 	config::MaxSignatureSize,
 	config::MaxProofBranchSize,
@@ -59,8 +58,7 @@ pub type FinalizedHeaderUpdateOf = FinalizedHeaderUpdate<
 	config::MaxProofBranchSize,
 	config::MaxSyncCommitteeSize,
 >;
-pub type ExecutionHeaderOf =
-	ExecutionHeader<config::MaxLogsBloomSize, config::MaxExtraDataSize>;
+pub type ExecutionHeaderOf = ExecutionHeader<config::MaxLogsBloomSize, config::MaxExtraDataSize>;
 pub type SyncCommitteeOf = SyncCommittee<config::MaxSyncCommitteeSize>;
 
 #[frame_support::pallet]
@@ -145,7 +143,7 @@ pub mod pallet {
 	/// Historical sync committees till the sync committee of latest finalized header.
 	#[pallet::storage]
 	pub(super) type SyncCommittees<T: Config> =
-	CountedStorageMap<_, Identity, u64, SyncCommitteeOf, ValueQuery>;
+		CountedStorageMap<_, Identity, u64, SyncCommitteeOf, ValueQuery>;
 
 	#[pallet::storage]
 	pub(super) type ValidatorsRoot<T: Config> = StorageValue<_, H256, ValueQuery>;
@@ -210,9 +208,7 @@ pub mod pallet {
 				sync_committee_period
 			);
 
-			if let Err(err) =
-				Self::process_light_client_update(sync_committee_period_update)
-			{
+			if let Err(err) = Self::process_light_client_update(sync_committee_period_update) {
 				log::error!(
 					target: "ethereum-beacon-client",
 					"💫 Sync committee period update failed with error {:?}",
@@ -285,8 +281,9 @@ pub mod pallet {
 
 	impl<T: Config> Pallet<T> {
 		fn process_initial_sync(initial_sync: InitialSyncOf) -> DispatchResult {
-			let sync_committee_root = merkleization::hash_tree_root_sync_committee(&initial_sync.current_sync_committee)
-				.map_err(|_| Error::<T>::SyncCommitteeHashTreeRootFailed)?;
+			let sync_committee_root =
+				merkleization::hash_tree_root_sync_committee(&initial_sync.current_sync_committee)
+					.map_err(|_| Error::<T>::SyncCommitteeHashTreeRootFailed)?;
 			Self::verify_sync_committee(
 				sync_committee_root.into(),
 				initial_sync.current_sync_committee_branch,
@@ -310,11 +307,11 @@ pub mod pallet {
 		}
 
 		fn is_next_sync_committee_known(finalized_period: u64) -> bool {
-			<SyncCommittees<T>>::get(finalized_period+1).pubkeys.len() != 0
+			<SyncCommittees<T>>::get(finalized_period + 1).pubkeys.len() != 0
 		}
 
 		fn stored_next_sync_committee(finalized_period: u64) -> SyncCommitteeOf {
-			<SyncCommittees<T>>::get(finalized_period+1)
+			<SyncCommittees<T>>::get(finalized_period + 1)
 		}
 
 		fn stored_current_sync_committee(finalized_period: u64) -> SyncCommitteeOf {
@@ -329,55 +326,75 @@ pub mod pallet {
 			update.finality_branch.len() != 0
 		}
 
-		fn validate_light_client_update(update: &SyncCommitteePeriodUpdateOf, current_slot: u64, validators_root: Root) -> DispatchResult {
+		fn validate_light_client_update(
+			update: &SyncCommitteePeriodUpdateOf,
+			current_slot: u64,
+			validators_root: Root,
+		) -> DispatchResult {
 			let sync_committee_bits =
 				get_sync_committee_bits(update.sync_aggregate.sync_committee_bits.clone())
 					.map_err(|_| Error::<T>::InvalidSyncCommitteeBits)?;
 			Self::sync_committee_participation_is_supermajority(sync_committee_bits.clone())?;
 
 			let update_attested_slot = update.attested_header.slot;
-            let update_finalized_slot = update.finalized_header.slot;
+			let update_finalized_slot = update.finalized_header.slot;
 
 			ensure!(
 				current_slot >= update.signature_slot &&
-				update.signature_slot > update_attested_slot &&
-				update_attested_slot >= update_finalized_slot,
+					update.signature_slot > update_attested_slot &&
+					update_attested_slot >= update_finalized_slot,
 				Error::<T>::InvalidSlotsOrdering
 			);
 
 			let stored_latest_finalized_header_state = <LatestFinalizedHeaderState<T>>::get();
-			let store_period = Self::compute_sync_committee_period(stored_latest_finalized_header_state.beacon_slot);
-			let update_signature_period = Self::compute_sync_committee_period(update.signature_slot);
+			let store_period = Self::compute_sync_committee_period(
+				stored_latest_finalized_header_state.beacon_slot,
+			);
+			let update_signature_period =
+				Self::compute_sync_committee_period(update.signature_slot);
 
 			if Self::is_next_sync_committee_known(store_period) {
-				ensure!(update_signature_period == store_period || update_signature_period == store_period+1, Error::<T>::UnrecognizedSyncCommittee);
+				ensure!(
+					update_signature_period == store_period ||
+						update_signature_period == store_period + 1,
+					Error::<T>::UnrecognizedSyncCommittee
+				);
 			} else {
-				ensure!(update_signature_period == store_period, Error::<T>::UnrecognizedSyncCommittee);
+				ensure!(
+					update_signature_period == store_period,
+					Error::<T>::UnrecognizedSyncCommittee
+				);
 			}
 
 			let update_attested_period = Self::compute_sync_committee_period(update_attested_slot);
 			let update_has_next_sync_committee = !Self::is_next_sync_committee_known(store_period) &&
-				(Self::is_sync_committee_update(&update) && update_attested_period == store_period);
+				(Self::is_sync_committee_update(&update) &&
+					update_attested_period == store_period);
 
-			ensure!(update_attested_slot > stored_latest_finalized_header_state.beacon_slot ||
-				update_has_next_sync_committee,
+			ensure!(
+				update_attested_slot > stored_latest_finalized_header_state.beacon_slot ||
+					update_has_next_sync_committee,
 				Error::<T>::NonRelevantUpdate
 			);
 
 			if !Self::is_finality_update(&update) {
-				ensure!(update.finalized_header == Default::default(),
+				ensure!(
+					update.finalized_header == Default::default(),
 					Error::<T>::NonEmptyFinalizedHeader
 				);
 			} else {
 				let mut finalized_block_root: H256 = Default::default();
 				if update_finalized_slot == config::GenesisSlot::get() {
-					ensure!(update.finalized_header == Default::default(),
+					ensure!(
+						update.finalized_header == Default::default(),
 						Error::<T>::NonEmptyFinalizedHeader
 					);
 				} else {
-					finalized_block_root = merkleization::hash_tree_root_beacon_header(update.finalized_header.clone())
-						.map_err(|_| Error::<T>::HeaderHashTreeRootFailed)?
-						.into();
+					finalized_block_root = merkleization::hash_tree_root_beacon_header(
+						update.finalized_header.clone(),
+					)
+					.map_err(|_| Error::<T>::HeaderHashTreeRootFailed)?
+					.into();
 				}
 
 				Self::verify_header(
@@ -390,17 +407,24 @@ pub mod pallet {
 			}
 
 			if !Self::is_sync_committee_update(&update) {
-				ensure!(update.next_sync_committee == Default::default(),
+				ensure!(
+					update.next_sync_committee == Default::default(),
 					Error::<T>::NonEmptySyncCommittee
 				);
 			} else {
-				if update_attested_period == store_period && Self::is_next_sync_committee_known(store_period) {
+				if update_attested_period == store_period &&
+					Self::is_next_sync_committee_known(store_period)
+				{
 					let stored_next_committee = Self::stored_next_sync_committee(store_period);
-					ensure!(update.next_sync_committee.eq(&stored_next_committee), Error::<T>::NextSyncCommitteeMismatch);
+					ensure!(
+						update.next_sync_committee.eq(&stored_next_committee),
+						Error::<T>::NextSyncCommitteeMismatch
+					);
 				}
 
-				let next_sync_committee_root = merkleization::hash_tree_root_sync_committee(&update.next_sync_committee)
-					.map_err(|_| Error::<T>::SyncCommitteeHashTreeRootFailed)?;
+				let next_sync_committee_root =
+					merkleization::hash_tree_root_sync_committee(&update.next_sync_committee)
+						.map_err(|_| Error::<T>::SyncCommitteeHashTreeRootFailed)?;
 
 				Self::verify_sync_committee(
 					next_sync_committee_root.into(),
@@ -429,14 +453,22 @@ pub mod pallet {
 			Ok(())
 		}
 
-		fn apply_light_client_update(update: SyncCommitteePeriodUpdateOf, store_period: u64, finalized_header_state: FinalizedHeaderState) -> DispatchResult {
-			let update_finalized_period = Self::compute_sync_committee_period(update.finalized_header.slot);
+		fn apply_light_client_update(
+			update: SyncCommitteePeriodUpdateOf,
+			store_period: u64,
+			finalized_header_state: FinalizedHeaderState,
+		) -> DispatchResult {
+			let update_finalized_period =
+				Self::compute_sync_committee_period(update.finalized_header.slot);
 
 			if !Self::is_next_sync_committee_known(store_period) {
-				ensure!(update_finalized_period == store_period, Error::<T>::FinalizedPeriodMismatch);
-				<SyncCommittees<T>>::set(store_period+1, update.next_sync_committee);
+				ensure!(
+					update_finalized_period == store_period,
+					Error::<T>::FinalizedPeriodMismatch
+				);
+				<SyncCommittees<T>>::set(store_period + 1, update.next_sync_committee);
 			} else if update_finalized_period == store_period + 1 {
-				<SyncCommittees<T>>::set(store_period+2, update.next_sync_committee);
+				<SyncCommittees<T>>::set(store_period + 2, update.next_sync_committee);
 			}
 
 			if update.finalized_header.slot > finalized_header_state.beacon_slot {
@@ -461,7 +493,9 @@ pub mod pallet {
 				let number_of_sync_committees_to_remove = stored_sync_committees as u64 - threshold;
 
 				let mut current_sync_committee_to_remove = highest_period_to_remove;
-				while current_sync_committee_to_remove > (highest_period_to_remove - number_of_sync_committees_to_remove) {
+				while current_sync_committee_to_remove >
+					(highest_period_to_remove - number_of_sync_committees_to_remove)
+				{
 					<SyncCommittees<T>>::remove(current_sync_committee_to_remove);
 					current_sync_committee_to_remove -= 1;
 				}
@@ -485,28 +519,38 @@ pub mod pallet {
 			if time > weak_subjectivity_period_check {
 				log::info!(target: "ethereum-beacon-client","💫 Weak subjectivity period exceeded, blocking bridge.",);
 				<Blocked<T>>::set(true);
-				return Err(Error::<T>::BridgeBlocked.into());
+				return Err(Error::<T>::BridgeBlocked.into())
 			}
-
 
 			let validators_root = <ValidatorsRoot<T>>::get();
 			Self::validate_light_client_update(&update, update.signature_slot, validators_root)?;
 			let sync_committee_bits = update.sync_aggregate.sync_committee_bits.clone();
 
 			let stored_latest_finalized_header_state = <LatestFinalizedHeaderState<T>>::get();
-			let store_period = Self::compute_sync_committee_period(stored_latest_finalized_header_state.beacon_slot);
-			let update_has_finalized_next_sync_committee = !Self::is_next_sync_committee_known(store_period) &&
-				Self::is_sync_committee_update(&update) &&
-				Self::is_finality_update(&update) &&
-				(Self::compute_sync_committee_period(update.finalized_header.slot) == Self::compute_sync_committee_period(update.attested_header.slot));
+			let store_period = Self::compute_sync_committee_period(
+				stored_latest_finalized_header_state.beacon_slot,
+			);
+			let update_has_finalized_next_sync_committee =
+				!Self::is_next_sync_committee_known(store_period) &&
+					Self::is_sync_committee_update(&update) &&
+					Self::is_finality_update(&update) &&
+					(Self::compute_sync_committee_period(update.finalized_header.slot) ==
+						Self::compute_sync_committee_period(update.attested_header.slot));
 
-			if (Self::get_sync_committee_sum(sync_committee_bits.to_vec()) * 3 >= sync_committee_bits.clone().len() as u64 * 2) &&
-				((update.finalized_header.slot > stored_latest_finalized_header_state.beacon_slot) || update_has_finalized_next_sync_committee)
+			if (Self::get_sync_committee_sum(sync_committee_bits.to_vec()) * 3 >=
+				sync_committee_bits.clone().len() as u64 * 2) &&
+				((update.finalized_header.slot >
+					stored_latest_finalized_header_state.beacon_slot) ||
+					update_has_finalized_next_sync_committee)
 			{
-				Self::apply_light_client_update(update, store_period, stored_latest_finalized_header_state)?;
+				Self::apply_light_client_update(
+					update,
+					store_period,
+					stored_latest_finalized_header_state,
+				)?;
 				Self::prune_older_sync_committees();
 			} else {
-				return Err(Error::<T>::NotApplicableUpdate.into());
+				return Err(Error::<T>::NotApplicableUpdate.into())
 			}
 
 			Ok(())
@@ -786,7 +830,7 @@ pub mod pallet {
 				last_finalized_header.import_time = T::TimeProvider::now().as_secs();
 				last_finalized_header.beacon_block_header = header;
 				last_finalized_header.beacon_slot = slot;
-				last_finalized_header.beacon_block_root= block_root;
+				last_finalized_header.beacon_block_root = block_root;
 
 				<LatestFinalizedHeaderState<T>>::set(last_finalized_header);
 			}
@@ -801,7 +845,8 @@ pub mod pallet {
 			if stored_execution_headers as u64 > threshold {
 				let mut current_execution_header_to_delete = threshold + 1;
 				while current_execution_header_to_delete <= stored_execution_headers {
-					let execution_header_hash = <ExecutionHeadersMapping<T>>::get(current_execution_header_to_delete);
+					let execution_header_hash =
+						<ExecutionHeadersMapping<T>>::get(current_execution_header_to_delete);
 					<ExecutionHeadersMapping<T>>::remove(current_execution_header_to_delete);
 					<ExecutionHeaders<T>>::remove(execution_header_hash);
 					current_execution_header_to_delete += 1;
@@ -818,7 +863,10 @@ pub mod pallet {
 			let block_number = header.block_number;
 
 			<ExecutionHeaders<T>>::insert(block_hash, header);
-			<ExecutionHeadersMapping<T>>::insert(<ExecutionHeaders<T>>::count() as u64 + 1, block_hash);
+			<ExecutionHeadersMapping<T>>::insert(
+				<ExecutionHeaders<T>>::count() as u64 + 1,
+				block_hash,
+			);
 			Self::prune_older_execution_headers();
 
 			let mut execution_header_state = <LatestExecutionHeaderState<T>>::get();

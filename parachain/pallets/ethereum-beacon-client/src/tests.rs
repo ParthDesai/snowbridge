@@ -1,20 +1,19 @@
-use frame_support::{assert_err, assert_ok};
-use hex_literal::hex;
-use snowbridge_beacon_primitives::BeaconHeader;
-use crate::{config, merkleization};
-use crate::merkleization::MerkleizationError;
-use crate::mock::new_tester;
 use crate as ethereum_beacon_client;
 use crate::{
-	mock::*,
+	config, merkleization,
+	merkleization::MerkleizationError,
+	mock::{new_tester, *},
 	ssz::{
 		SSZAttestation, SSZAttestationData, SSZAttesterSlashing, SSZCheckpoint, SSZEth1Data,
 		SSZExecutionPayload, SSZSyncAggregate,
 	},
 	Error, PublicKey,
 };
+use frame_support::{assert_err, assert_ok};
+use hex_literal::hex;
 use snowbridge_beacon_primitives::{
-	Attestation, AttestationData, Checkpoint, Eth1Data, ExecutionPayload, SyncAggregate,
+	Attestation, AttestationData, BeaconHeader, Checkpoint, Eth1Data, ExecutionPayload,
+	SyncAggregate,
 };
 use sp_core::{H256, U256};
 use ssz_rs::prelude::Vector;
@@ -73,16 +72,14 @@ pub fn test_compute_signing_root_bls() {
 				slot: 3529537,
 				proposer_index: 192549,
 				parent_root: hex!(
-						"1f8dc05ea427f78e84e2e2666e13c3befb7106fd1d40ef8a3f67cf615f3f2a4c"
-					)
-					.into(),
+					"1f8dc05ea427f78e84e2e2666e13c3befb7106fd1d40ef8a3f67cf615f3f2a4c"
+				)
+				.into(),
 				state_root: hex!(
-						"0dfb492a83da711996d2d76b64604f9bca9dc08b6c13cf63b3be91742afe724b"
-					)
-					.into(),
-				body_root: hex!(
-						"66fba38f7c8c2526f7ddfe09c1a54dd12ff93bdd4d0df6a0950e88e802228bfa"
-					)
+					"0dfb492a83da711996d2d76b64604f9bca9dc08b6c13cf63b3be91742afe724b"
+				)
+				.into(),
+				body_root: hex!("66fba38f7c8c2526f7ddfe09c1a54dd12ff93bdd4d0df6a0950e88e802228bfa")
 					.into(),
 			},
 			hex!("07000000afcaaba0efab1ca832a15152469bb09bb84641c405171dfa2d3fb45f").into(),
@@ -104,16 +101,14 @@ pub fn test_compute_signing_root_kiln() {
 				slot: 221316,
 				proposer_index: 79088,
 				parent_root: hex!(
-						"b4c15cd79da1a4e645b0104fa66d226cb6dce0fae3522789cc4d0b3ae41d96f7"
-					)
-					.into(),
+					"b4c15cd79da1a4e645b0104fa66d226cb6dce0fae3522789cc4d0b3ae41d96f7"
+				)
+				.into(),
 				state_root: hex!(
-						"6f711ef2e36decbc8f7037e73bbdace42c11f2896a43e44ab8a78dcb2ba66122"
-					)
-					.into(),
-				body_root: hex!(
-						"963eaa01341c16dc8f288da47eedad0792978fdaab9f1f97ae0a1103494d1a10"
-					)
+					"6f711ef2e36decbc8f7037e73bbdace42c11f2896a43e44ab8a78dcb2ba66122"
+				)
+				.into(),
+				body_root: hex!("963eaa01341c16dc8f288da47eedad0792978fdaab9f1f97ae0a1103494d1a10")
 					.into(),
 			},
 			hex!("07000000afcaaba0efab1ca832a15152469bb09bb84641c405171dfa2d3fb45f").into(),
@@ -135,16 +130,14 @@ pub fn test_compute_signing_root_kiln_head_update() {
 				slot: 222472,
 				proposer_index: 10726,
 				parent_root: hex!(
-						"5d481a9721f0ecce9610eab51d400d223683d599b7fcebca7e4c4d10cdef6ebb"
-					)
-					.into(),
+					"5d481a9721f0ecce9610eab51d400d223683d599b7fcebca7e4c4d10cdef6ebb"
+				)
+				.into(),
 				state_root: hex!(
-						"14eb4575895f996a84528b789ff2e4d5148242e2983f03068353b2c37015507a"
-					)
-					.into(),
-				body_root: hex!(
-						"7bb669c75b12e0781d6fa85d7fc2f32d64eafba89f39678815b084c156e46cac"
-					)
+					"14eb4575895f996a84528b789ff2e4d5148242e2983f03068353b2c37015507a"
+				)
+				.into(),
+				body_root: hex!("7bb669c75b12e0781d6fa85d7fc2f32d64eafba89f39678815b084c156e46cac")
 					.into(),
 			},
 			hex!("07000000e7acb21061790987fa1c1e745cccfb358370b33e8af2b2c18938e6c2").into(),
@@ -182,22 +175,16 @@ pub fn test_is_valid_merkle_proof() {
 			mock_mainnet::EthereumBeaconClient::is_valid_merkle_branch(
 				hex!("0000000000000000000000000000000000000000000000000000000000000000").into(),
 				vec![
-					hex!("0000000000000000000000000000000000000000000000000000000000000000")
-						.into(),
-					hex!("5f6f02af29218292d21a69b64a794a7c0873b3e0f54611972863706e8cbdf371")
-						.into(),
-					hex!("e7125ff9ab5a840c44bedb4731f440a405b44e15f2d1a89e27341b432fabe13d")
-						.into(),
-					hex!("002c1fe5bc0bd62db6f299a582f2a80a6d5748ccc82e7ed843eaf0ae0739f74a")
-						.into(),
-					hex!("d2dc4ba9fd4edff6716984136831e70a6b2e74fca27b8097a820cbbaa5a6e3c3")
-						.into(),
-					hex!("91f77a19d8afa4a08e81164bb2e570ecd10477b3b65c305566a6d2be88510584")
-						.into(),
+					hex!("0000000000000000000000000000000000000000000000000000000000000000").into(),
+					hex!("5f6f02af29218292d21a69b64a794a7c0873b3e0f54611972863706e8cbdf371").into(),
+					hex!("e7125ff9ab5a840c44bedb4731f440a405b44e15f2d1a89e27341b432fabe13d").into(),
+					hex!("002c1fe5bc0bd62db6f299a582f2a80a6d5748ccc82e7ed843eaf0ae0739f74a").into(),
+					hex!("d2dc4ba9fd4edff6716984136831e70a6b2e74fca27b8097a820cbbaa5a6e3c3").into(),
+					hex!("91f77a19d8afa4a08e81164bb2e570ecd10477b3b65c305566a6d2be88510584").into(),
 				]
-					.to_vec()
-					.try_into()
-					.expect("proof branch is too long"),
+				.to_vec()
+				.try_into()
+				.expect("proof branch is too long"),
 				6,
 				41,
 				hex!("e46559327592741956f6beaa0f52e49625eb85dce037a0bd2eff333c743b287f").into()
@@ -214,16 +201,13 @@ pub fn test_merkle_proof_fails_if_depth_and_branch_dont_match() {
 			mock_mainnet::EthereumBeaconClient::is_valid_merkle_branch(
 				hex!("0000000000000000000000000000000000000000000000000000000000000000").into(),
 				vec![
-					hex!("0000000000000000000000000000000000000000000000000000000000000000")
-						.into(),
-					hex!("5f6f02af29218292d21a69b64a794a7c0873b3e0f54611972863706e8cbdf371")
-						.into(),
-					hex!("e7125ff9ab5a840c44bedb4731f440a405b44e15f2d1a89e27341b432fabe13d")
-						.into(),
+					hex!("0000000000000000000000000000000000000000000000000000000000000000").into(),
+					hex!("5f6f02af29218292d21a69b64a794a7c0873b3e0f54611972863706e8cbdf371").into(),
+					hex!("e7125ff9ab5a840c44bedb4731f440a405b44e15f2d1a89e27341b432fabe13d").into(),
 				]
-					.to_vec()
-					.try_into()
-					.expect("proof branch is too long"),
+				.to_vec()
+				.try_into()
+				.expect("proof branch is too long"),
 				6,
 				41,
 				hex!("e46559327592741956f6beaa0f52e49625eb85dce037a0bd2eff333c743b287f").into()
@@ -297,40 +281,36 @@ pub fn test_bls_fast_aggregate_verify_invalid_signature() {
 	});
 }
 
-
 pub fn sync_committee_participation_is_supermajority(bits: Vec<u8>) {
-	let sync_committee_bits = merkleization::get_sync_committee_bits::<
-		config::MaxSyncCommitteeSize,
-	>(bits.try_into().expect("too many sync committee bits"));
+	let sync_committee_bits = merkleization::get_sync_committee_bits::<config::MaxSyncCommitteeSize>(
+		bits.try_into().expect("too many sync committee bits"),
+	);
 
 	assert_ok!(&sync_committee_bits);
 
-	assert_ok!(
-			mock_mainnet::EthereumBeaconClient::sync_committee_participation_is_supermajority(
-				sync_committee_bits.unwrap()
-			)
-		);
+	assert_ok!(mock_mainnet::EthereumBeaconClient::sync_committee_participation_is_supermajority(
+		sync_committee_bits.unwrap()
+	));
 }
 
 #[test]
 pub fn test_sync_committee_participation_is_supermajority() {
 	#[cfg(feature = "mainnet")]
 	sync_committee_participation_is_supermajority(hex!("cffffffff8f1ffdfcfeffeffbfdffffbfffffdffffefefffdffff7f7ffff77fffdf7bff77ffdf7fffafffffff77fefffeff7effffffff5f7fedfffdfb6ddff7b").to_vec());
-	
+
 	#[cfg(not(feature = "mainnet"))]
 	sync_committee_participation_is_supermajority(hex!("bffffffff7f1ffdfcfeffeffbfdffffbfffffdffffefefffdffff7f7ffff77fffdf7bff77ffdf7fffafffffff77fefffeff7effffffff5f7fedfffdfb6ddff7b").to_vec());
 }
 
-
 pub fn sync_committee_bits_too_short(bits: Vec<u8>) {
-	let sync_committee_bits = merkleization::get_sync_committee_bits::<
-		config::MaxSyncCommitteeSize,
-	>(bits.try_into().expect("invalid sync committee bits"));
+	let sync_committee_bits = merkleization::get_sync_committee_bits::<config::MaxSyncCommitteeSize>(
+		bits.try_into().expect("invalid sync committee bits"),
+	);
 
 	assert_err!(
-			sync_committee_bits,
-			MerkleizationError::ExpectedFurtherInput { provided: 47, expected: 64 }
-		);
+		sync_committee_bits,
+		MerkleizationError::ExpectedFurtherInput { provided: 47, expected: 64 }
+	);
 }
 
 #[test]
@@ -342,16 +322,15 @@ pub fn test_sync_committee_bits_too_short() {
 	sync_committee_bits_too_short(hex!("bffffffff7f1ffdfcfeffeffbfdffffbfffffdffffefefffdffff7f7ffff77fffdf7bffff5f7fedfffdfb6ddff7bf7").to_vec());
 }
 
-
 pub fn sync_committee_bits_extra_input(bits: Vec<u8>) {
-	let sync_committee_bits = merkleization::get_sync_committee_bits::<
-		config::MaxSyncCommitteeSize,
-	>(bits.try_into().expect("invalid sync committee bits"));
+	let sync_committee_bits = merkleization::get_sync_committee_bits::<config::MaxSyncCommitteeSize>(
+		bits.try_into().expect("invalid sync committee bits"),
+	);
 
 	assert_err!(
-			sync_committee_bits,
-			MerkleizationError::AdditionalInput { provided: 130, expected: 64 }
-		);
+		sync_committee_bits,
+		MerkleizationError::AdditionalInput { provided: 130, expected: 64 }
+	);
 }
 
 #[test]
@@ -367,53 +346,45 @@ pub fn test_sync_committee_bits_extra_input() {
 pub fn test_sync_committee_participation_is_supermajority_errors_when_not_supermajority() {
 	new_tester::<mock_mainnet::Test>().execute_with(|| {
 		let sync_committee_bits = vec![
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0,
-			1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1,
-			1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1,
-			1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
-			0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1,
-			1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
-			0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1,
-			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 1, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+			1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1,
+			1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1,
+			1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1,
+			1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1,
+			1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1,
+			1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0,
+			1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+			1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1,
+			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+			1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1,
+			0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
+			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
 		];
 
 		assert_err!(
-				mock_mainnet::EthereumBeaconClient::sync_committee_participation_is_supermajority(
-					sync_committee_bits
-				),
-				Error::<mock_mainnet::Test>::SyncCommitteeParticipantsNotSupermajority
-			);
+			mock_mainnet::EthereumBeaconClient::sync_committee_participation_is_supermajority(
+				sync_committee_bits
+			),
+			Error::<mock_mainnet::Test>::SyncCommitteeParticipantsNotSupermajority
+		);
 	});
 }
 
 #[test]
 pub fn test_hash_tree_root_beacon_header() {
-	let hash_root =
-		merkleization::hash_tree_root_beacon_header(BeaconHeader {
-			slot: 3,
-			proposer_index: 2,
-			parent_root: hex!(
-					"796ea53efb534eab7777809cc5ee2d84e7f25024b9d0c4d7e5bcaab657e4bdbd"
-				)
-				.into(),
-			state_root: hex!(
-					"ba3ff080912be5c9c158b2e962c1b39a91bc0615762ba6fa2ecacafa94e9ae0a"
-				)
-				.into(),
-			body_root: hex!("a18d7fcefbb74a177c959160e0ee89c23546482154e6831237710414465dcae5")
-				.into(),
-		});
+	let hash_root = merkleization::hash_tree_root_beacon_header(BeaconHeader {
+		slot: 3,
+		proposer_index: 2,
+		parent_root: hex!("796ea53efb534eab7777809cc5ee2d84e7f25024b9d0c4d7e5bcaab657e4bdbd")
+			.into(),
+		state_root: hex!("ba3ff080912be5c9c158b2e962c1b39a91bc0615762ba6fa2ecacafa94e9ae0a").into(),
+		body_root: hex!("a18d7fcefbb74a177c959160e0ee89c23546482154e6831237710414465dcae5").into(),
+	});
 
 	assert_ok!(&hash_root);
 	assert_eq!(
@@ -428,13 +399,9 @@ pub fn test_hash_tree_root_beacon_header_more_test_values() {
 		merkleization::hash_tree_root_beacon_header(ethereum_beacon_client::BeaconHeader {
 			slot: 3476424,
 			proposer_index: 314905,
-			parent_root: hex!(
-					"c069d7b49cffd2b815b0fb8007eb9ca91202ea548df6f3db60000f29b2489f28"
-				)
+			parent_root: hex!("c069d7b49cffd2b815b0fb8007eb9ca91202ea548df6f3db60000f29b2489f28")
 				.into(),
-			state_root: hex!(
-					"444d293e4533501ee508ad608783a7d677c3c566f001313e8a02ce08adf590a3"
-				)
+			state_root: hex!("444d293e4533501ee508ad608783a7d677c3c566f001313e8a02ce08adf590a3")
 				.into(),
 			body_root: hex!("6508a0241047f21ba88f05d05b15534156ab6a6f8e029a9a5423da429834e04a")
 				.into(),
@@ -452,9 +419,9 @@ pub fn test_hash_tree_root_fork_data() {
 	let hash_root = merkleization::hash_tree_root_fork_data(ethereum_beacon_client::ForkData {
 		current_version: hex!("83f38a34").into(),
 		genesis_validators_root: hex!(
-				"22370bbbb358800f5711a10ea9845284272d8493bed0348cab87b8ab1e127930"
-			)
-			.into(),
+			"22370bbbb358800f5711a10ea9845284272d8493bed0348cab87b8ab1e127930"
+		)
+		.into(),
 	});
 
 	assert_ok!(&hash_root);
@@ -468,12 +435,9 @@ pub fn test_hash_tree_root_fork_data() {
 pub fn test_hash_tree_root_signing_data() {
 	let hash_root =
 		merkleization::hash_tree_root_signing_data(ethereum_beacon_client::SigningData {
-			object_root: hex!(
-					"63654cbe64fc07853f1198c165dd3d49c54fc53bc417989bbcc66da15f850c54"
-				)
+			object_root: hex!("63654cbe64fc07853f1198c165dd3d49c54fc53bc417989bbcc66da15f850c54")
 				.into(),
-			domain: hex!("037da907d1c3a03c0091b2254e1480d9b1783476e228ab29adaaa8f133e08f7a")
-				.into(),
+			domain: hex!("037da907d1c3a03c0091b2254e1480d9b1783476e228ab29adaaa8f133e08f7a").into(),
 		});
 
 	assert_ok!(&hash_root);
@@ -489,10 +453,9 @@ pub fn test_hash_eth1_data() {
 		deposit_root: hex!("d70a234731285c6804c2a4f56711ddb8c82c99740f207854891028af34e27e5e")
 			.into(),
 		deposit_count: 0,
-		block_hash: hex!("0000000000000000000000000000000000000000000000000000000000000000")
-			.into(),
+		block_hash: hex!("0000000000000000000000000000000000000000000000000000000000000000").into(),
 	}
-		.try_into();
+	.try_into();
 	assert_ok!(&payload);
 
 	let hash_root = merkleization::hash_tree_root(payload.unwrap());
@@ -502,9 +465,10 @@ pub fn test_hash_eth1_data() {
 	);
 }
 
-
-pub fn hash_sync_aggregate(sync_aggregate: SyncAggregate<config::MaxSyncCommitteeSize, config::MaxSignatureSize>,
-						   expected_hash_root: H256) {
+pub fn hash_sync_aggregate(
+	sync_aggregate: SyncAggregate<config::MaxSyncCommitteeSize, config::MaxSignatureSize>,
+	expected_hash_root: H256,
+) {
 	let payload: Result<SSZSyncAggregate, MerkleizationError> = sync_aggregate.try_into();
 	assert_ok!(&payload);
 
@@ -517,7 +481,6 @@ pub fn hash_sync_aggregate(sync_aggregate: SyncAggregate<config::MaxSyncCommitte
 
 #[test]
 pub fn test_hash_sync_aggregate() {
-
 	#[cfg(feature = "mainnet")]
 	hash_sync_aggregate(SyncAggregate{
 		sync_committee_bits: hex!("cefffffefffffff767fffbedffffeffffeeffdffffdebffffff7f7dbdf7fffdffffbffcfffdff79dfffbbfefff2ffffff7ddeff7ffffc98ff7fbfffffffffff7").to_vec().try_into().expect("sync committee bits are too long"),
@@ -608,22 +571,18 @@ pub fn test_hash_tree_root_attestation_data() {
 	let payload: Result<SSZAttestationData, MerkleizationError> = AttestationData {
 		slot: 484119,
 		index: 25,
-		beacon_block_root: hex!(
-				"2e93202be9ab790aea3d84ae1313a6daaf115c7de54a05038fba715be67b06d5"
-			)
+		beacon_block_root: hex!("2e93202be9ab790aea3d84ae1313a6daaf115c7de54a05038fba715be67b06d5")
 			.into(),
 		source: Checkpoint {
 			epoch: 15127,
-			root: hex!("e665df84b5f1b4db9112b5c3876f5c10063347bfaf1025732137cf9abca28b75")
-				.into(),
+			root: hex!("e665df84b5f1b4db9112b5c3876f5c10063347bfaf1025732137cf9abca28b75").into(),
 		},
 		target: Checkpoint {
 			epoch: 15128,
-			root: hex!("3a667c20c78352228169181f19757c774ca93d81047a6c121a0e88b2c385c7f7")
-				.into(),
+			root: hex!("3a667c20c78352228169181f19757c774ca93d81047a6c121a0e88b2c385c7f7").into(),
 		},
 	}
-		.try_into();
+	.try_into();
 
 	assert_ok!(&payload);
 
@@ -642,7 +601,7 @@ pub fn test_hash_tree_root_checkpoint() {
 		epoch: 15127,
 		root: hex!("e665df84b5f1b4db9112b5c3876f5c10063347bfaf1025732137cf9abca28b75").into(),
 	}
-		.try_into();
+	.try_into();
 
 	assert_ok!(&payload);
 
@@ -673,15 +632,23 @@ pub fn test_hash_tree_root_attester_slashing() {
 
 #[cfg(feature = "mainnet")]
 mod beacon_tests {
+	use crate::{
+		config, merkleization,
+		merkleization::MerkleizationError,
+		mock::{
+			get_bls_signature_verify_test_data, get_committee_sync_period_update,
+			get_finalized_header_update, get_header_update, get_initial_sync, get_validators_root,
+			mock_mainnet as mock, new_tester,
+		},
+		pallet::{
+			Error, ExecutionHeaders, LatestFinalizedHeaderState, SyncCommittees, ValidatorsRoot,
+		},
+		ssz::SSZBeaconBlockBody,
+	};
 	use frame_support::{assert_err, assert_ok};
 	use hex_literal::hex;
 	use snowbridge_beacon_primitives::FinalizedHeaderState;
 	use sp_core::H256;
-	use crate::{config, merkleization};
-	use crate::merkleization::MerkleizationError;
-	use crate::mock::{get_bls_signature_verify_test_data, get_committee_sync_period_update, get_finalized_header_update, get_header_update, get_initial_sync, get_validators_root, mock_mainnet as mock, new_tester};
-	use crate::pallet::{ExecutionHeaders, LatestFinalizedHeaderState, SyncCommittees, ValidatorsRoot, Error};
-	use crate::ssz::SSZBeaconBlockBody;
 
 	#[test]
 	fn it_syncs_from_an_initial_checkpoint() {
@@ -707,10 +674,8 @@ mod beacon_tests {
 		let second_update = get_committee_sync_period_update("_second");
 		let third_update = get_committee_sync_period_update("_third");
 
-
-		let current_period = mock::EthereumBeaconClient::compute_sync_committee_period(
-			update.attested_header.slot,
-		);
+		let current_period =
+			mock::EthereumBeaconClient::compute_sync_committee_period(update.attested_header.slot);
 
 		new_tester::<mock::Test>().execute_with(|| {
 			assert_ok!(mock::EthereumBeaconClient::initial_sync(initial_sync.clone()));
@@ -720,43 +685,59 @@ mod beacon_tests {
 				update.clone(),
 			));
 
-			// We are expecting initial sync header to be latest as its slot is greater than the update we received
+			// We are expecting initial sync header to be latest as its slot is greater than the
+			// update we received
 			let expected_latest_finalized_block_root: H256 =
 				merkleization::hash_tree_root_beacon_header(initial_sync.header.clone())
 					.unwrap()
 					.into();
 
 			let latest_finalized_header_state = <LatestFinalizedHeaderState<mock::Test>>::get();
-			assert_eq!(latest_finalized_header_state.beacon_block_root, expected_latest_finalized_block_root);
+			assert_eq!(
+				latest_finalized_header_state.beacon_block_root,
+				expected_latest_finalized_block_root
+			);
 
-			// Even though we did not update latest finalized header, we should have updated next sync committee
-			let next_sync_committee_stored = <SyncCommittees<mock::Test>>::get(current_period+1);
+			// Even though we did not update latest finalized header, we should have updated next
+			// sync committee
+			let next_sync_committee_stored = <SyncCommittees<mock::Test>>::get(current_period + 1);
 			assert_eq!(next_sync_committee_stored, update.next_sync_committee);
 
-			assert_err!(mock::EthereumBeaconClient::sync_committee_period_update(
-				mock::RuntimeOrigin::signed(1),
-				second_update.clone(),
-			), Error::<mock::Test>::NotApplicableUpdate);
+			assert_err!(
+				mock::EthereumBeaconClient::sync_committee_period_update(
+					mock::RuntimeOrigin::signed(1),
+					second_update.clone(),
+				),
+				Error::<mock::Test>::NotApplicableUpdate
+			);
 
-			// We are expecting that latest block root still won't be updated as last update was deemed as not applicable
+			// We are expecting that latest block root still won't be updated as last update was
+			// deemed as not applicable
 			let latest_finalized_header_state = <LatestFinalizedHeaderState<mock::Test>>::get();
-			assert_eq!(latest_finalized_header_state.beacon_block_root, expected_latest_finalized_block_root);
+			assert_eq!(
+				latest_finalized_header_state.beacon_block_root,
+				expected_latest_finalized_block_root
+			);
 
 			assert_ok!(mock::EthereumBeaconClient::sync_committee_period_update(
 				mock::RuntimeOrigin::signed(1),
 				third_update.clone(),
 			));
 
-			// Latest finalized header should be updated as third update contains the new finalized header
+			// Latest finalized header should be updated as third update contains the new finalized
+			// header
 			let expected_latest_finalized_block_root: H256 =
 				merkleization::hash_tree_root_beacon_header(third_update.finalized_header.clone())
 					.unwrap()
 					.into();
 			let latest_finalized_header_state = <LatestFinalizedHeaderState<mock::Test>>::get();
-			assert_eq!(latest_finalized_header_state.beacon_block_root, expected_latest_finalized_block_root);
+			assert_eq!(
+				latest_finalized_header_state.beacon_block_root,
+				expected_latest_finalized_block_root
+			);
 
 			// We should have updated next sync committee
-			let next_sync_committee_stored = <SyncCommittees<mock::Test>>::get(current_period+2);
+			let next_sync_committee_stored = <SyncCommittees<mock::Test>>::get(current_period + 2);
 			assert_eq!(next_sync_committee_stored, third_update.next_sync_committee);
 		});
 	}
@@ -781,7 +762,10 @@ mod beacon_tests {
 					.into();
 
 			let latest_finalized_header_state = <LatestFinalizedHeaderState<mock::Test>>::get();
-			assert_eq!(latest_finalized_header_state.beacon_block_root, expected_latest_finalized_block_root);
+			assert_eq!(
+				latest_finalized_header_state.beacon_block_root,
+				expected_latest_finalized_block_root
+			);
 		});
 	}
 
@@ -789,8 +773,7 @@ mod beacon_tests {
 	fn it_processes_a_header_update() {
 		let update = get_header_update();
 
-		let current_sync_committee =
-			get_initial_sync().current_sync_committee;
+		let current_sync_committee = get_initial_sync().current_sync_committee;
 
 		let current_period =
 			mock::EthereumBeaconClient::compute_sync_committee_period(update.block.slot);
@@ -889,18 +872,23 @@ mod beacon_tests {
 	}
 }
 
-
 #[cfg(not(feature = "mainnet"))]
 mod beacon_tests {
+	use crate::{
+		config, merkleization,
+		merkleization::MerkleizationError,
+		mock::{
+			get_bls_signature_verify_test_data, get_committee_sync_period_update,
+			get_finalized_header_update, get_header_update, get_initial_sync, get_validators_root,
+			mock_goerli as mock, mock_goerli, new_tester,
+		},
+		pallet::{ExecutionHeaders, LatestFinalizedHeaderState, SyncCommittees, ValidatorsRoot},
+		ssz::SSZBeaconBlockBody,
+	};
 	use frame_support::assert_ok;
 	use hex_literal::hex;
 	use snowbridge_beacon_primitives::{BeaconHeader, FinalizedHeaderState};
 	use sp_core::H256;
-	use crate::{config, merkleization};
-	use crate::merkleization::MerkleizationError;
-	use crate::mock::{get_bls_signature_verify_test_data, get_committee_sync_period_update, get_finalized_header_update, get_header_update, get_initial_sync, get_validators_root, mock_goerli as mock, mock_goerli, new_tester};
-	use crate::pallet::{ExecutionHeaders, LatestFinalizedHeaderState, SyncCommittees, ValidatorsRoot};
-	use crate::ssz::SSZBeaconBlockBody;
 
 	#[test]
 	fn it_syncs_from_an_initial_checkpoint() {
@@ -925,9 +913,8 @@ mod beacon_tests {
 		let update = get_committee_sync_period_update("");
 		let next_update = get_committee_sync_period_update("_next");
 
-		let current_period = mock::EthereumBeaconClient::compute_sync_committee_period(
-			update.attested_header.slot,
-		);
+		let current_period =
+			mock::EthereumBeaconClient::compute_sync_committee_period(update.attested_header.slot);
 
 		new_tester::<mock::Test>().execute_with(|| {
 			assert_ok!(mock::EthereumBeaconClient::initial_sync(initial_sync.clone()));
@@ -937,17 +924,22 @@ mod beacon_tests {
 				update.clone(),
 			));
 
-			// We are expecting initial sync header to be latest as its slot is greater than the update we received
+			// We are expecting initial sync header to be latest as its slot is greater than the
+			// update we received
 			let expected_latest_finalized_block_root: H256 =
 				merkleization::hash_tree_root_beacon_header(initial_sync.header.clone())
 					.unwrap()
 					.into();
 
 			let latest_finalized_header_state = <LatestFinalizedHeaderState<mock::Test>>::get();
-			assert_eq!(latest_finalized_header_state.beacon_block_root, expected_latest_finalized_block_root);
+			assert_eq!(
+				latest_finalized_header_state.beacon_block_root,
+				expected_latest_finalized_block_root
+			);
 
-			// Even though we did not update latest finalized header, we should have updated next sync committee
-			let next_sync_committee_stored = <SyncCommittees<mock::Test>>::get(current_period+1);
+			// Even though we did not update latest finalized header, we should have updated next
+			// sync committee
+			let next_sync_committee_stored = <SyncCommittees<mock::Test>>::get(current_period + 1);
 			assert_eq!(next_sync_committee_stored, update.next_sync_committee);
 
 			assert_ok!(mock::EthereumBeaconClient::sync_committee_period_update(
@@ -955,17 +947,21 @@ mod beacon_tests {
 				next_update.clone(),
 			));
 
-			// We are expecting next update sync header to be latest as its slot is greater than the current stored header
+			// We are expecting next update sync header to be latest as its slot is greater than the
+			// current stored header
 			let expected_latest_finalized_block_root: H256 =
 				merkleization::hash_tree_root_beacon_header(next_update.finalized_header.clone())
 					.unwrap()
 					.into();
 
 			let latest_finalized_header_state = <LatestFinalizedHeaderState<mock::Test>>::get();
-			assert_eq!(latest_finalized_header_state.beacon_block_root, expected_latest_finalized_block_root);
+			assert_eq!(
+				latest_finalized_header_state.beacon_block_root,
+				expected_latest_finalized_block_root
+			);
 
 			// We should have updated next sync committee
-			let next_sync_committee_stored = <SyncCommittees<mock::Test>>::get(current_period+2);
+			let next_sync_committee_stored = <SyncCommittees<mock::Test>>::get(current_period + 2);
 			assert_eq!(next_sync_committee_stored, next_update.next_sync_committee);
 		});
 	}
@@ -990,7 +986,10 @@ mod beacon_tests {
 					.into();
 
 			let latest_finalized_header_state = <LatestFinalizedHeaderState<mock::Test>>::get();
-			assert_eq!(latest_finalized_header_state.beacon_block_root, expected_latest_finalized_block_root);
+			assert_eq!(
+				latest_finalized_header_state.beacon_block_root,
+				expected_latest_finalized_block_root
+			);
 		});
 	}
 
@@ -998,8 +997,7 @@ mod beacon_tests {
 	fn it_processes_a_header_update() {
 		let update = get_header_update();
 
-		let current_sync_committee =
-			get_initial_sync().current_sync_committee;
+		let current_sync_committee = get_initial_sync().current_sync_committee;
 
 		let current_period =
 			mock::EthereumBeaconClient::compute_sync_committee_period(update.block.slot);

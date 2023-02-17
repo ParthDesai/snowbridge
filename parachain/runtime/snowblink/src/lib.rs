@@ -689,7 +689,7 @@ construct_runtime!(
 		LocalCouncilMembership: pallet_membership::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 11,
 
 		// Bridge Infrastructure
-		
+
 		BasicOutboundChannel: basic_channel_outbound::{Pallet, Config<T>, Storage, Event<T>} = 13,
 		// 14 and 15 were used for the incentivized inbound and outbound channels respectively
 		Dispatch: dispatch::{Pallet, Call, Storage, Event<T>, Origin} = 16,

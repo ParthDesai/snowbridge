@@ -23,5 +23,8 @@ macro_rules! const_parameter_types {
 
 #[macro_export]
 macro_rules! raw_const {
-	($path:path) => ({ use $path as const_st; const_st::RAW });
+	($path:path) => {{
+		use $path as const_st;
+		const_st::RAW
+	}};
 }

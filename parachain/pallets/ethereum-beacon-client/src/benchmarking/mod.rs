@@ -1,6 +1,5 @@
 use super::*;
-use crate::config;
-use crate::Pallet as EthereumBeaconClient;
+use crate::{config, Pallet as EthereumBeaconClient};
 use frame_benchmarking::{benchmarks, impl_benchmark_test_suite, whitelisted_caller};
 use frame_system::RawOrigin;
 
