@@ -33,33 +33,33 @@ use sp_std::prelude::*;
 pub use pallet::*;
 
 pub type BlockUpdateOf = BlockUpdate<
-	config::MaxFeeRecipientSize,
-	config::MaxLogsBloomSize,
-	config::MaxExtraDataSize,
-	config::MaxDepositDataSize,
-	config::MaxPublicKeySize,
-	config::MaxSignatureSize,
+	config::FeeRecipientSize,
+	config::BytesPerLogsBloom,
+	config::MaxExtraDataBytes,
+	config::MaxDeposits,
+	config::PublicKeySize,
+	config::SignatureSize,
 	config::MaxProofBranchSize,
-	config::MaxProposerSlashingSize,
-	config::MaxAttesterSlashingSize,
-	config::MaxVoluntaryExitSize,
-	config::MaxAttestationSize,
+	config::MaxProposerSlashings,
+	config::MaxAttesterSlashings,
+	config::MaxVoluntaryExits,
+	config::MaxAttestations,
 	config::MaxValidatorsPerCommittee,
-	config::MaxSyncCommitteeSize,
+	config::SyncCommitteeSize,
 >;
-pub type InitialSyncOf = InitialSync<config::MaxSyncCommitteeSize, config::MaxProofBranchSize>;
+pub type InitialSyncOf = InitialSync<config::SyncCommitteeSize, config::MaxProofBranchSize>;
 pub type SyncCommitteePeriodUpdateOf = SyncCommitteePeriodUpdate<
-	config::MaxSignatureSize,
+	config::SignatureSize,
 	config::MaxProofBranchSize,
-	config::MaxSyncCommitteeSize,
+	config::SyncCommitteeSize,
 >;
 pub type FinalizedHeaderUpdateOf = FinalizedHeaderUpdate<
-	config::MaxSignatureSize,
+	config::SignatureSize,
 	config::MaxProofBranchSize,
-	config::MaxSyncCommitteeSize,
+	config::SyncCommitteeSize,
 >;
-pub type ExecutionHeaderOf = ExecutionHeader<config::MaxLogsBloomSize, config::MaxExtraDataSize>;
-pub type SyncCommitteeOf = SyncCommittee<config::MaxSyncCommitteeSize>;
+pub type ExecutionHeaderOf = ExecutionHeader<config::BytesPerLogsBloom, config::MaxExtraDataBytes>;
+pub type SyncCommitteeOf = SyncCommittee<config::SyncCommitteeSize>;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -180,7 +180,7 @@ pub mod pallet {
 			log::info!(
 				target: "ethereum-beacon-client",
 				"💫 Sync committee size is: {}",
-				config::MaxSyncCommitteeSize::get()
+				config::SyncCommitteeSize::get()
 			);
 
 			if let Some(initial_sync) = self.initial_sync.clone() {
@@ -647,8 +647,8 @@ pub mod pallet {
 
 		pub(super) fn verify_signed_header(
 			sync_committee_bits: Vec<u8>,
-			sync_committee_signature: BoundedVec<u8, config::MaxSignatureSize>,
-			sync_committee_pubkeys: BoundedVec<PublicKey, config::MaxSyncCommitteeSize>,
+			sync_committee_signature: BoundedVec<u8, config::SignatureSize>,
+			sync_committee_pubkeys: BoundedVec<PublicKey, config::SyncCommitteeSize>,
 			header: BeaconHeader,
 			validators_root: H256,
 			signature_slot: u64,
@@ -690,7 +690,7 @@ pub mod pallet {
 		pub(super) fn bls_fast_aggregate_verify(
 			pubkeys: Vec<PublicKey>,
 			message: H256,
-			signature: BoundedVec<u8, config::MaxSignatureSize>,
+			signature: BoundedVec<u8, config::SignatureSize>,
 		) -> DispatchResult {
 			let sig = Signature::from_bytes(&signature[..]);
 			if let Err(_e) = sig {

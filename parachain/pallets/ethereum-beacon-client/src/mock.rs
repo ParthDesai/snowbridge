@@ -196,19 +196,19 @@ pub fn new_tester<T: Config>() -> sp_io::TestExternalities {
 #[cfg_attr(feature = "std", derive(serde::Serialize, serde::Deserialize))]
 pub struct BlockBodyTest {
 	pub body: Body<
-		config::MaxFeeRecipientSize,
-		config::MaxLogsBloomSize,
-		config::MaxExtraDataSize,
-		config::MaxDepositDataSize,
-		config::MaxPublicKeySize,
-		config::MaxSignatureSize,
+		config::FeeRecipientSize,
+		config::BytesPerLogsBloom,
+		config::MaxExtraDataBytes,
+		config::MaxDeposits,
+		config::PublicKeySize,
+		config::SignatureSize,
 		config::MaxProofBranchSize,
-		config::MaxProposerSlashingSize,
-		config::MaxAttesterSlashingSize,
-		config::MaxVoluntaryExitSize,
-		config::MaxAttestationSize,
+		config::MaxProposerSlashings,
+		config::MaxAttesterSlashings,
+		config::MaxVoluntaryExits,
+		config::MaxAttestations,
 		config::MaxValidatorsPerCommittee,
-		config::MaxSyncCommitteeSize,
+		config::SyncCommitteeSize,
 	>,
 	pub result: H256,
 }
@@ -228,7 +228,7 @@ fn fixture_path(name: &str) -> PathBuf {
 
 fn initial_sync_from_file(
 	name: &str,
-) -> InitialSync<config::MaxSyncCommitteeSize, config::MaxProofBranchSize> {
+) -> InitialSync<config::SyncCommitteeSize, config::MaxProofBranchSize> {
 	let filepath = fixture_path(name);
 	serde_json::from_reader(File::open(&filepath).unwrap()).unwrap()
 }
@@ -236,9 +236,9 @@ fn initial_sync_from_file(
 fn sync_committee_update_from_file(
 	name: &str,
 ) -> SyncCommitteePeriodUpdate<
-	config::MaxSignatureSize,
+	config::SignatureSize,
 	config::MaxProofBranchSize,
-	config::MaxSyncCommitteeSize,
+	config::SyncCommitteeSize,
 > {
 	let filepath = fixture_path(name);
 	serde_json::from_reader(File::open(&filepath).unwrap()).unwrap()
@@ -247,19 +247,19 @@ fn sync_committee_update_from_file(
 fn block_update_from_file(
 	name: &str,
 ) -> BlockUpdate<
-	config::MaxFeeRecipientSize,
-	config::MaxLogsBloomSize,
-	config::MaxExtraDataSize,
-	config::MaxDepositDataSize,
-	config::MaxPublicKeySize,
-	config::MaxSignatureSize,
+	config::FeeRecipientSize,
+	config::BytesPerLogsBloom,
+	config::MaxExtraDataBytes,
+	config::MaxDeposits,
+	config::PublicKeySize,
+	config::SignatureSize,
 	config::MaxProofBranchSize,
-	config::MaxProposerSlashingSize,
-	config::MaxAttesterSlashingSize,
-	config::MaxVoluntaryExitSize,
-	config::MaxAttestationSize,
+	config::MaxProposerSlashings,
+	config::MaxAttesterSlashings,
+	config::MaxVoluntaryExits,
+	config::MaxAttestations,
 	config::MaxValidatorsPerCommittee,
-	config::MaxSyncCommitteeSize,
+	config::SyncCommitteeSize,
 > {
 	let filepath = fixture_path(name);
 	serde_json::from_reader(File::open(&filepath).unwrap()).unwrap()
@@ -267,7 +267,7 @@ fn block_update_from_file(
 
 fn attester_slashing_from_file(
 	name: &str,
-) -> AttesterSlashing<config::MaxValidatorsPerCommittee, config::MaxSignatureSize> {
+) -> AttesterSlashing<config::MaxValidatorsPerCommittee, config::SignatureSize> {
 	let filepath = fixture_path(name);
 	serde_json::from_reader(File::open(&filepath).unwrap()).unwrap()
 }
@@ -283,16 +283,16 @@ fn add_file_prefix(name: &str) -> String {
 	result
 }
 
-pub fn get_initial_sync() -> InitialSync<config::MaxSyncCommitteeSize, config::MaxProofBranchSize> {
+pub fn get_initial_sync() -> InitialSync<config::SyncCommitteeSize, config::MaxProofBranchSize> {
 	initial_sync_from_file(&add_file_prefix("initial_sync.json"))
 }
 
 pub fn get_committee_sync_period_update(
 	suffix: &str,
 ) -> SyncCommitteePeriodUpdate<
-	config::MaxSignatureSize,
+	config::SignatureSize,
 	config::MaxProofBranchSize,
-	config::MaxSyncCommitteeSize,
+	config::SyncCommitteeSize,
 > {
 	sync_committee_update_from_file(&add_file_prefix(
 		format!("sync_committee_update{}.json", suffix).as_str(),
@@ -300,27 +300,27 @@ pub fn get_committee_sync_period_update(
 }
 
 pub fn get_header_update() -> BlockUpdate<
-	config::MaxFeeRecipientSize,
-	config::MaxLogsBloomSize,
-	config::MaxExtraDataSize,
-	config::MaxDepositDataSize,
-	config::MaxPublicKeySize,
-	config::MaxSignatureSize,
+	config::FeeRecipientSize,
+	config::BytesPerLogsBloom,
+	config::MaxExtraDataBytes,
+	config::MaxDeposits,
+	config::PublicKeySize,
+	config::SignatureSize,
 	config::MaxProofBranchSize,
-	config::MaxProposerSlashingSize,
-	config::MaxAttesterSlashingSize,
-	config::MaxVoluntaryExitSize,
-	config::MaxAttestationSize,
+	config::MaxProposerSlashings,
+	config::MaxAttesterSlashings,
+	config::MaxVoluntaryExits,
+	config::MaxAttestations,
 	config::MaxValidatorsPerCommittee,
-	config::MaxSyncCommitteeSize,
+	config::SyncCommitteeSize,
 > {
 	block_update_from_file(&add_file_prefix("block_update.json"))
 }
 
 pub fn get_finalized_header_update() -> SyncCommitteePeriodUpdate<
-	config::MaxSignatureSize,
+	config::SignatureSize,
 	config::MaxProofBranchSize,
-	config::MaxSyncCommitteeSize,
+	config::SyncCommitteeSize,
 > {
 	sync_committee_update_from_file(&add_file_prefix("finalized_header_update.json"))
 }
@@ -358,6 +358,6 @@ pub fn get_bls_signature_verify_test_data() -> BLSSignatureVerifyTest {
 }
 
 pub fn get_attester_slashing(
-) -> AttesterSlashing<config::MaxValidatorsPerCommittee, config::MaxSignatureSize> {
+) -> AttesterSlashing<config::MaxValidatorsPerCommittee, config::SignatureSize> {
 	attester_slashing_from_file("attester_slashing.json")
 }

@@ -24,7 +24,7 @@ benchmarks! {
 
 		EthereumBeaconClient::<T>::initial_sync(data::initial_sync()).unwrap();
 
-		let sync_update: SyncCommitteePeriodUpdate<config::MaxSignatureSize, config::MaxProofBranchSize, config::MaxSyncCommitteeSize> = data::sync_committee_update();
+		let sync_update: SyncCommitteePeriodUpdate<config::SignatureSize, config::MaxProofBranchSize, config::SyncCommitteeSize> = data::sync_committee_update();
 		SyncCommittees::<T>::set(sync_update.sync_committee_period+1, sync_update.next_sync_committee);
 
 		let block_update = data::block_update();

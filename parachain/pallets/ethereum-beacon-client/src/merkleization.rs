@@ -125,7 +125,7 @@ impl<FeeRecipientSize: Get<u32>, LogsBloomSize: Get<u32>, ExtraDataSize: Get<u32
 			gas_limit: execution_payload.gas_limit,
 			gas_used: execution_payload.gas_used,
 			timestamp: execution_payload.timestamp,
-			extra_data: List::<u8, { config::MaxExtraDataSize::get() as usize }>::try_from(
+			extra_data: List::<u8, { config::MaxExtraDataBytes::get() as usize }>::try_from(
 				execution_payload.extra_data.into_inner(),
 			)
 			.map_err(|_| MerkleizationError::ListError)?,
@@ -242,7 +242,7 @@ impl<SyncCommitteeBitsSize: Get<u32>, SignatureSize: Get<u32>>
 	) -> Result<Self, Self::Error> {
 		Ok(SSZSyncAggregate {
 			sync_committee_bits:
-				Bitvector::<{ config::MaxSyncCommitteeSize::get() as usize }>::deserialize(
+				Bitvector::<{ config::SyncCommitteeSize::get() as usize }>::deserialize(
 					&sync_aggregate.sync_committee_bits,
 				)?,
 			sync_committee_signature: Vector::<u8, 96>::from_iter(
@@ -271,7 +271,7 @@ pub fn get_ssz_deposits<
 	DepositSize: Get<u32>,
 >(
 	deposits: BoundedVec<Deposit<PublicKeySize, SignatureSize, ProofSize>, DepositSize>,
-) -> Result<List<SSZDeposit, { config::MaxDepositDataSize::get() as usize }>, MerkleizationError> {
+) -> Result<List<SSZDeposit, { config::MaxDeposits::get() as usize }>, MerkleizationError> {
 	let mut deposits_dev = Vec::new();
 
 	for deposit in deposits.iter() {
@@ -299,13 +299,13 @@ pub fn get_ssz_deposits<
 		});
 	}
 
-	Ok(List::<SSZDeposit, { config::MaxDepositDataSize::get() as usize }>::from_iter(deposits_dev))
+	Ok(List::<SSZDeposit, { config::MaxDeposits::get() as usize }>::from_iter(deposits_dev))
 }
 
 pub fn get_ssz_voluntary_exits<VoluntaryExitSize: Get<u32>>(
 	voluntary_exits: BoundedVec<VoluntaryExit, VoluntaryExitSize>,
 ) -> Result<
-	List<SSZVoluntaryExit, { config::MaxVoluntaryExitSize::get() as usize }>,
+	List<SSZVoluntaryExit, { config::MaxVoluntaryExits::get() as usize }>,
 	MerkleizationError,
 > {
 	let mut voluntary_exits_vec = Vec::new();
@@ -317,7 +317,7 @@ pub fn get_ssz_voluntary_exits<VoluntaryExitSize: Get<u32>>(
 		});
 	}
 
-	Ok(List::<SSZVoluntaryExit, { config::MaxVoluntaryExitSize::get() as usize }>::from_iter(
+	Ok(List::<SSZVoluntaryExit, { config::MaxVoluntaryExits::get() as usize }>::from_iter(
 		voluntary_exits_vec,
 	))
 }
@@ -328,7 +328,7 @@ pub fn get_ssz_attestations<
 	AttestationSize: Get<u32>,
 >(
 	attestations: BoundedVec<Attestation<AttestionBitsSize, SignatureSize>, AttestationSize>,
-) -> Result<List<SSZAttestation, { config::MaxAttestationSize::get() as usize }>, MerkleizationError>
+) -> Result<List<SSZAttestation, { config::MaxAttestations::get() as usize }>, MerkleizationError>
 {
 	let mut attestations_vec = Vec::new();
 
@@ -338,7 +338,7 @@ pub fn get_ssz_attestations<
 		attestations_vec.push(ssz_attestation);
 	}
 
-	Ok(List::<SSZAttestation, { config::MaxAttestationSize::get() as usize }>::from_iter(
+	Ok(List::<SSZAttestation, { config::MaxAttestations::get() as usize }>::from_iter(
 		attestations_vec,
 	))
 }
@@ -346,7 +346,7 @@ pub fn get_ssz_attestations<
 pub fn get_ssz_proposer_slashings<ProposerSlashingSize: Get<u32>, SignatureSize: Get<u32>>(
 	proposer_slashings: BoundedVec<ProposerSlashing<SignatureSize>, ProposerSlashingSize>,
 ) -> Result<
-	List<SSZProposerSlashing, { config::MaxProposerSlashingSize::get() as usize }>,
+	List<SSZProposerSlashing, { config::MaxProposerSlashings::get() as usize }>,
 	MerkleizationError,
 > {
 	let mut proposer_slashings_vec = Vec::new();
@@ -355,7 +355,7 @@ pub fn get_ssz_proposer_slashings<ProposerSlashingSize: Get<u32>, SignatureSize:
 		proposer_slashings_vec.push(get_ssz_proposer_slashing((*proposer_slashing).clone())?);
 	}
 
-	Ok(List::<SSZProposerSlashing, { config::MaxProposerSlashingSize::get() as usize }>::from_iter(
+	Ok(List::<SSZProposerSlashing, { config::MaxProposerSlashings::get() as usize }>::from_iter(
 		proposer_slashings_vec,
 	))
 }
@@ -390,7 +390,7 @@ pub fn get_ssz_attester_slashings<
 		AttesterSlashingSize,
 	>,
 ) -> Result<
-	List<SSZAttesterSlashing, { config::MaxAttesterSlashingSize::get() as usize }>,
+	List<SSZAttesterSlashing, { config::MaxAttesterSlashings::get() as usize }>,
 	MerkleizationError,
 > {
 	let mut attester_slashings_vec = Vec::new();
@@ -401,7 +401,7 @@ pub fn get_ssz_attester_slashings<
 		attester_slashings_vec.push(ssz_attester_slashing);
 	}
 
-	Ok(List::<SSZAttesterSlashing, { config::MaxAttesterSlashingSize::get() as usize }>::from_iter(
+	Ok(List::<SSZAttesterSlashing, { config::MaxAttesterSlashings::get() as usize }>::from_iter(
 		attester_slashings_vec,
 	))
 }
@@ -462,7 +462,7 @@ pub fn hash_tree_root_sync_committee<S: Get<u32>>(
 	}
 
 	let pubkeys =
-		Vector::<Vector<u8, 48>, { config::MaxSyncCommitteeSize::get() as usize }>::from_iter(
+		Vector::<Vector<u8, 48>, { config::SyncCommitteeSize::get() as usize }>::from_iter(
 			pubkeys_vec.clone(),
 		);
 
@@ -503,7 +503,7 @@ pub fn get_sync_committee_bits<SyncCommitteeBitsSize: Get<u32>>(
 	bits_hex: BoundedVec<u8, SyncCommitteeBitsSize>,
 ) -> Result<Vec<u8>, MerkleizationError> {
 	let bitv =
-		Bitvector::<{ config::MaxSyncCommitteeSize::get() as usize }>::deserialize(&bits_hex)
+		Bitvector::<{ config::SyncCommitteeSize::get() as usize }>::deserialize(&bits_hex)
 			.map_err(
 				//|_| MerkleizationError::InvalidInput
 				|e| -> MerkleizationError {

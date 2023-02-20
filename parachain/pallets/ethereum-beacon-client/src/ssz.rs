@@ -14,10 +14,10 @@ pub struct SSZVoluntaryExit {
 
 #[derive(Default, Debug, SimpleSerialize, Clone)]
 pub struct SSZDepositData {
-	pub pubkey: Vector<u8, { config::MaxPublicKeySize::get() as usize }>,
+	pub pubkey: Vector<u8, { config::PublicKeySize::get() as usize }>,
 	pub withdrawal_credentials: [u8; 32],
 	pub amount: u64,
-	pub signature: Vector<u8, { config::MaxSignatureSize::get() as usize }>,
+	pub signature: Vector<u8, { config::SignatureSize::get() as usize }>,
 }
 
 #[derive(Default, Debug, SimpleSerialize, Clone)]
@@ -44,14 +44,14 @@ pub struct SSZAttestationData {
 #[derive(Default, Debug, SimpleSerialize, Clone)]
 pub struct SignedBeaconBlockHeader {
 	pub message: SSZBeaconBlockHeader,
-	pub signature: Vector<u8, { config::MaxSignatureSize::get() as usize }>,
+	pub signature: Vector<u8, { config::SignatureSize::get() as usize }>,
 }
 
 #[derive(Default, Debug, SimpleSerialize, Clone)]
 pub struct SSZIndexedAttestation {
 	pub attesting_indices: List<u64, { config::MaxValidatorsPerCommittee::get() as usize }>,
 	pub data: SSZAttestationData,
-	pub signature: Vector<u8, { config::MaxSignatureSize::get() as usize }>,
+	pub signature: Vector<u8, { config::SignatureSize::get() as usize }>,
 }
 
 #[derive(Default, Debug, SimpleSerialize, Clone)]
@@ -77,7 +77,7 @@ pub struct SSZEth1Data {
 pub struct SSZAttestation {
 	pub aggregation_bits: Bitlist<{ config::MaxValidatorsPerCommittee::get() as usize }>,
 	pub data: SSZAttestationData,
-	pub signature: Vector<u8, { config::MaxSignatureSize::get() as usize }>,
+	pub signature: Vector<u8, { config::SignatureSize::get() as usize }>,
 }
 
 #[derive(Default, SimpleSerialize)]
@@ -101,16 +101,16 @@ pub struct SSZBeaconBlockHeader {
 #[derive(Default, SimpleSerialize)]
 pub struct SSZSyncCommittee {
 	pub pubkeys: Vector<
-		Vector<u8, { config::MaxPublicKeySize::get() as usize }>,
-		{ config::MaxSyncCommitteeSize::get() as usize },
+		Vector<u8, { config::PublicKeySize::get() as usize }>,
+		{ config::SyncCommitteeSize::get() as usize },
 	>,
-	pub aggregate_pubkey: Vector<u8, { config::MaxPublicKeySize::get() as usize }>,
+	pub aggregate_pubkey: Vector<u8, { config::PublicKeySize::get() as usize }>,
 }
 
 #[derive(Default, Debug, SimpleSerialize, Clone)]
 pub struct SSZSyncAggregate {
-	pub sync_committee_bits: Bitvector<{ config::MaxSyncCommitteeSize::get() as usize }>,
-	pub sync_committee_signature: Vector<u8, { config::MaxSignatureSize::get() as usize }>,
+	pub sync_committee_bits: Bitvector<{ config::SyncCommitteeSize::get() as usize }>,
+	pub sync_committee_signature: Vector<u8, { config::SignatureSize::get() as usize }>,
 }
 
 #[derive(Default, SimpleSerialize)]
@@ -128,16 +128,16 @@ pub struct SSZSigningData {
 #[derive(Default, SimpleSerialize, Clone, Debug)]
 pub struct SSZExecutionPayload {
 	pub parent_hash: [u8; 32],
-	pub fee_recipient: Vector<u8, { config::MaxFeeRecipientSize::get() as usize }>,
+	pub fee_recipient: Vector<u8, { config::FeeRecipientSize::get() as usize }>,
 	pub state_root: [u8; 32],
 	pub receipts_root: [u8; 32],
-	pub logs_bloom: Vector<u8, { config::MaxLogsBloomSize::get() as usize }>,
+	pub logs_bloom: Vector<u8, { config::BytesPerLogsBloom::get() as usize }>,
 	pub prev_randao: [u8; 32],
 	pub block_number: u64,
 	pub gas_limit: u64,
 	pub gas_used: u64,
 	pub timestamp: u64,
-	pub extra_data: List<u8, { config::MaxExtraDataSize::get() as usize }>,
+	pub extra_data: List<u8, { config::MaxExtraDataBytes::get() as usize }>,
 	pub base_fee_per_gas: U256,
 	pub block_hash: [u8; 32],
 	pub transactions_root: [u8; 32],
@@ -145,16 +145,16 @@ pub struct SSZExecutionPayload {
 
 #[derive(Default, Debug, SimpleSerialize, Clone)]
 pub struct SSZBeaconBlockBody {
-	pub randao_reveal: Vector<u8, { config::MaxSignatureSize::get() as usize }>,
+	pub randao_reveal: Vector<u8, { config::SignatureSize::get() as usize }>,
 	pub eth1_data: SSZEth1Data,
 	pub graffiti: [u8; 32],
 	pub proposer_slashings:
-		List<SSZProposerSlashing, { config::MaxProposerSlashingSize::get() as usize }>,
+		List<SSZProposerSlashing, { config::MaxProposerSlashings::get() as usize }>,
 	pub attester_slashings:
-		List<SSZAttesterSlashing, { config::MaxAttesterSlashingSize::get() as usize }>,
-	pub attestations: List<SSZAttestation, { config::MaxAttestationSize::get() as usize }>,
-	pub deposits: List<SSZDeposit, { config::MaxDepositDataSize::get() as usize }>,
-	pub voluntary_exits: List<SSZVoluntaryExit, { config::MaxVoluntaryExitSize::get() as usize }>,
+		List<SSZAttesterSlashing, { config::MaxAttesterSlashings::get() as usize }>,
+	pub attestations: List<SSZAttestation, { config::MaxAttestations::get() as usize }>,
+	pub deposits: List<SSZDeposit, { config::MaxDeposits::get() as usize }>,
+	pub voluntary_exits: List<SSZVoluntaryExit, { config::MaxVoluntaryExits::get() as usize }>,
 	pub sync_aggregate: SSZSyncAggregate,
 	pub execution_payload: SSZExecutionPayload,
 }

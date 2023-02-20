@@ -282,7 +282,7 @@ pub fn test_bls_fast_aggregate_verify_invalid_signature() {
 }
 
 pub fn sync_committee_participation_is_supermajority(bits: Vec<u8>) {
-	let sync_committee_bits = merkleization::get_sync_committee_bits::<config::MaxSyncCommitteeSize>(
+	let sync_committee_bits = merkleization::get_sync_committee_bits::<config::SyncCommitteeSize>(
 		bits.try_into().expect("too many sync committee bits"),
 	);
 
@@ -303,7 +303,7 @@ pub fn test_sync_committee_participation_is_supermajority() {
 }
 
 pub fn sync_committee_bits_too_short(bits: Vec<u8>) {
-	let sync_committee_bits = merkleization::get_sync_committee_bits::<config::MaxSyncCommitteeSize>(
+	let sync_committee_bits = merkleization::get_sync_committee_bits::<config::SyncCommitteeSize>(
 		bits.try_into().expect("invalid sync committee bits"),
 	);
 
@@ -323,7 +323,7 @@ pub fn test_sync_committee_bits_too_short() {
 }
 
 pub fn sync_committee_bits_extra_input(bits: Vec<u8>) {
-	let sync_committee_bits = merkleization::get_sync_committee_bits::<config::MaxSyncCommitteeSize>(
+	let sync_committee_bits = merkleization::get_sync_committee_bits::<config::SyncCommitteeSize>(
 		bits.try_into().expect("invalid sync committee bits"),
 	);
 
@@ -466,7 +466,7 @@ pub fn test_hash_eth1_data() {
 }
 
 pub fn hash_sync_aggregate(
-	sync_aggregate: SyncAggregate<config::MaxSyncCommitteeSize, config::MaxSignatureSize>,
+	sync_aggregate: SyncAggregate<config::SyncCommitteeSize, config::SignatureSize>,
 	expected_hash_root: H256,
 ) {
 	let payload: Result<SSZSyncAggregate, MerkleizationError> = sync_aggregate.try_into();
@@ -509,7 +509,7 @@ pub fn test_hash_sync_signature() {
 #[test]
 pub fn test_hash_tree_root_execution_payload() {
 	let payload: Result<SSZExecutionPayload, MerkleizationError> =
-		ExecutionPayload::<config::MaxFeeRecipientSize, config::MaxLogsBloomSize, config::MaxExtraDataSize>{
+		ExecutionPayload::<config::FeeRecipientSize, config::BytesPerLogsBloom, config::MaxExtraDataBytes>{
 			parent_hash: hex!("eadee5ab098dde64e9fd02ae5858064bad67064070679625b09f8d82dec183f7").into(),
 			fee_recipient: hex!("f97e180c050e5ab072211ad2c213eb5aee4df134").to_vec().try_into().expect("fee recipient bits are too long"),
 			state_root: hex!("564fa064c2a324c2b5978d7fdfc5d4224d4f421a45388af1ed405a399c845dff").into(),
@@ -537,7 +537,7 @@ pub fn test_hash_tree_root_execution_payload() {
 #[test]
 pub fn test_hash_tree_root_attestation() {
 	let payload: Result<SSZAttestation, MerkleizationError> =
-		Attestation::<config::MaxValidatorsPerCommittee, config::MaxSignatureSize>{
+		Attestation::<config::MaxValidatorsPerCommittee, config::SignatureSize>{
 			aggregation_bits: hex!("ffcffeff7ffffffffefbf7ffffffdff73e").to_vec().try_into().expect("aggregation bits are too long"),
 			data: AttestationData{
 				slot: 484119,
@@ -855,7 +855,7 @@ mod beacon_tests {
 		let test_data = get_bls_signature_verify_test_data();
 
 		let sync_committee_bits =
-			merkleization::get_sync_committee_bits::<config::MaxSyncCommitteeSize>(
+			merkleization::get_sync_committee_bits::<config::SyncCommitteeSize>(
 				test_data.sync_committee_bits.try_into().expect("too many sync committee bits"),
 			);
 
@@ -1043,7 +1043,7 @@ mod beacon_tests {
 		let test_data = get_bls_signature_verify_test_data();
 
 		let sync_committee_bits =
-			merkleization::get_sync_committee_bits::<config::MaxSyncCommitteeSize>(
+			merkleization::get_sync_committee_bits::<config::SyncCommitteeSize>(
 				test_data.sync_committee_bits.try_into().expect("too many sync committee bits"),
 			);
 
