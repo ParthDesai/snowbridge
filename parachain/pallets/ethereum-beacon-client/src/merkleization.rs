@@ -304,10 +304,8 @@ pub fn get_ssz_deposits<
 
 pub fn get_ssz_voluntary_exits<VoluntaryExitSize: Get<u32>>(
 	voluntary_exits: BoundedVec<VoluntaryExit, VoluntaryExitSize>,
-) -> Result<
-	List<SSZVoluntaryExit, { config::MaxVoluntaryExits::get() as usize }>,
-	MerkleizationError,
-> {
+) -> Result<List<SSZVoluntaryExit, { config::MaxVoluntaryExits::get() as usize }>, MerkleizationError>
+{
 	let mut voluntary_exits_vec = Vec::new();
 
 	for voluntary_exit in voluntary_exits.iter() {
@@ -328,8 +326,7 @@ pub fn get_ssz_attestations<
 	AttestationSize: Get<u32>,
 >(
 	attestations: BoundedVec<Attestation<AttestionBitsSize, SignatureSize>, AttestationSize>,
-) -> Result<List<SSZAttestation, { config::MaxAttestations::get() as usize }>, MerkleizationError>
-{
+) -> Result<List<SSZAttestation, { config::MaxAttestations::get() as usize }>, MerkleizationError> {
 	let mut attestations_vec = Vec::new();
 
 	for attestation in attestations.iter() {
@@ -502,26 +499,25 @@ pub fn hash_tree_root<T: SimpleSerializeTrait>(
 pub fn get_sync_committee_bits<SyncCommitteeBitsSize: Get<u32>>(
 	bits_hex: BoundedVec<u8, SyncCommitteeBitsSize>,
 ) -> Result<Vec<u8>, MerkleizationError> {
-	let bitv =
-		Bitvector::<{ config::SyncCommitteeSize::get() as usize }>::deserialize(&bits_hex)
-			.map_err(
-				//|_| MerkleizationError::InvalidInput
-				|e| -> MerkleizationError {
-					match e {
-						DeserializeError::ExpectedFurtherInput { provided, expected } =>
-							MerkleizationError::ExpectedFurtherInput {
-								provided: provided as u64,
-								expected: expected as u64,
-							},
-						DeserializeError::AdditionalInput { provided, expected } =>
-							MerkleizationError::AdditionalInput {
-								provided: provided as u64,
-								expected: expected as u64,
-							},
-						_ => MerkleizationError::InvalidInput,
-					}
-				},
-			)?;
+	let bitv = Bitvector::<{ config::SyncCommitteeSize::get() as usize }>::deserialize(&bits_hex)
+		.map_err(
+		//|_| MerkleizationError::InvalidInput
+		|e| -> MerkleizationError {
+			match e {
+				DeserializeError::ExpectedFurtherInput { provided, expected } =>
+					MerkleizationError::ExpectedFurtherInput {
+						provided: provided as u64,
+						expected: expected as u64,
+					},
+				DeserializeError::AdditionalInput { provided, expected } =>
+					MerkleizationError::AdditionalInput {
+						provided: provided as u64,
+						expected: expected as u64,
+					},
+				_ => MerkleizationError::InvalidInput,
+			}
+		},
+	)?;
 
 	let result = bitv.iter().map(|bit| if bit == true { 1 } else { 0 }).collect::<Vec<_>>();
 

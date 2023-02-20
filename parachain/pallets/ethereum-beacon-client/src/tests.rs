@@ -854,10 +854,9 @@ mod beacon_tests {
 	pub fn test_bls_fast_aggregate_verify() {
 		let test_data = get_bls_signature_verify_test_data();
 
-		let sync_committee_bits =
-			merkleization::get_sync_committee_bits::<config::SyncCommitteeSize>(
-				test_data.sync_committee_bits.try_into().expect("too many sync committee bits"),
-			);
+		let sync_committee_bits = merkleization::get_sync_committee_bits::<config::SyncCommitteeSize>(
+			test_data.sync_committee_bits.try_into().expect("too many sync committee bits"),
+		);
 
 		assert_ok!(&sync_committee_bits);
 
@@ -1042,10 +1041,9 @@ mod beacon_tests {
 	pub fn test_bls_fast_aggregate_verify() {
 		let test_data = get_bls_signature_verify_test_data();
 
-		let sync_committee_bits =
-			merkleization::get_sync_committee_bits::<config::SyncCommitteeSize>(
-				test_data.sync_committee_bits.try_into().expect("too many sync committee bits"),
-			);
+		let sync_committee_bits = merkleization::get_sync_committee_bits::<config::SyncCommitteeSize>(
+			test_data.sync_committee_bits.try_into().expect("too many sync committee bits"),
+		);
 
 		assert_ok!(&sync_committee_bits);
 
