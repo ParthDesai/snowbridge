@@ -95,6 +95,7 @@ pub mod pallet {
 	pub enum Event<T: Config> {
 		BeaconHeaderImported { block_hash: H256, slot: u64 },
 		ExecutionHeaderImported { block_hash: H256, block_number: u64 },
+		SyncCommitteeUpdated { period: u64 },
 	}
 
 	#[pallet::error]
@@ -127,6 +128,7 @@ pub mod pallet {
 		NonEmptySyncCommittee,
 		NextSyncCommitteeMismatch,
 		FinalizedPeriodMismatch,
+		NonSequentialSyncCommitteeUpdate,
 	}
 
 	#[pallet::hooks]
@@ -299,7 +301,7 @@ pub mod pallet {
 					.map_err(|_| Error::<T>::HeaderHashTreeRootFailed)?
 					.into();
 
-			Self::store_sync_committee(period, initial_sync.current_sync_committee);
+			Self::store_sync_committee(period, initial_sync.current_sync_committee)?;
 			Self::store_finalized_header(block_root, initial_sync.header);
 			Self::store_validators_root(initial_sync.validators_root);
 
@@ -466,9 +468,9 @@ pub mod pallet {
 					update_finalized_period == store_period,
 					Error::<T>::FinalizedPeriodMismatch
 				);
-				<SyncCommittees<T>>::set(store_period + 1, update.next_sync_committee);
+				Self::store_sync_committee(store_period + 1, update.next_sync_committee)?;
 			} else if update_finalized_period == store_period + 1 {
-				<SyncCommittees<T>>::set(store_period + 2, update.next_sync_committee);
+				Self::store_sync_committee(store_period + 2, update.next_sync_committee)?;
 			}
 
 			if update.finalized_header.slot > finalized_header_state.beacon_slot {
@@ -787,25 +789,24 @@ pub mod pallet {
 			Ok(())
 		}
 
-		fn store_sync_committee(period: u64, sync_committee: SyncCommitteeOf) {
-			<SyncCommittees<T>>::insert(period, sync_committee);
-
+		fn store_sync_committee(period: u64, sync_committee: SyncCommitteeOf) -> DispatchResult {
 			let latest_committee_period = <LatestSyncCommitteePeriod<T>>::get();
+			// We only store sync committee sequentially except during initial update
+			ensure!(
+				latest_committee_period == 0 || latest_committee_period + 1 == period,
+				Error::<T>::NonSequentialSyncCommitteeUpdate
+			);
+			<SyncCommittees<T>>::insert(period, sync_committee);
+			<LatestSyncCommitteePeriod<T>>::set(period);
 
 			log::trace!(
 				target: "ethereum-beacon-client",
 				"💫 Saved sync committee for period {}.",
 				period
 			);
+			Self::deposit_event(Event::SyncCommitteeUpdated { period });
 
-			if period > latest_committee_period {
-				log::trace!(
-					target: "ethereum-beacon-client",
-					"💫 Updated latest sync committee period stored to {}.",
-					period
-				);
-				<LatestSyncCommitteePeriod<T>>::set(period);
-			}
+			Ok(())
 		}
 
 		fn store_finalized_header(block_root: Root, header: BeaconHeader) {
