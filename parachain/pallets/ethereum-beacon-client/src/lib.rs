@@ -829,7 +829,6 @@ pub mod pallet {
 					slot
 				);
 				last_finalized_header.import_time = T::TimeProvider::now().as_secs();
-				last_finalized_header.beacon_block_header = header;
 				last_finalized_header.beacon_slot = slot;
 				last_finalized_header.beacon_block_root = block_root;
 

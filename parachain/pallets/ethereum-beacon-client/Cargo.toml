@@ -29,7 +29,7 @@ sp-std = { git = "https://github.com/paritytech/substrate.git", branch = "polkad
 sp-io = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30", default-features = false }
 sp-runtime = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30", default-features = false }
 
-snowbridge-beacon-primitives = { path = "../../primitives/beacon", default-features = false }
+snowbridge-beacon-primitives = { git = "https://github.com/snowfork/snowbridge", rev = "a8564bb83f5838f486c867e1a57d46bb71225e61", default-features = false }
 
 [dev-dependencies]
 sp-keyring = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.30" }

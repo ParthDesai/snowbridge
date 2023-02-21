@@ -530,5 +530,6 @@
         "0x5081a613f87c5e6e0d389d002b5f277dd3b4f30ed6cbd48ca064517fa5c6267a",
         "0x02db7b648c948e69e6a184763e40e38c11f1ae757b7029d0c2a5a8927da5d56b"
     ],
-    "validators_root": "0x4b363db94e286120d76eb905340fdd4e54bfe9f06bf33ff6cf5ad27f511bfe95"
+    "validators_root": "0x4b363db94e286120d76eb905340fdd4e54bfe9f06bf33ff6cf5ad27f511bfe95",
+    "import_time": 0
 }

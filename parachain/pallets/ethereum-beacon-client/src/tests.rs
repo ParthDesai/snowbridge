@@ -783,7 +783,6 @@ mod beacon_tests {
 			ValidatorsRoot::<mock::Test>::set(get_validators_root());
 			LatestFinalizedHeaderState::<mock::Test>::set(FinalizedHeaderState {
 				beacon_block_root: H256::default(),
-				beacon_block_header: Default::default(),
 				beacon_slot: update.block.slot,
 				import_time: 0,
 			});
@@ -886,7 +885,7 @@ mod beacon_tests {
 	};
 	use frame_support::assert_ok;
 	use hex_literal::hex;
-	use snowbridge_beacon_primitives::{BeaconHeader, FinalizedHeaderState};
+	use snowbridge_beacon_primitives::FinalizedHeaderState;
 	use sp_core::H256;
 
 	#[test]
@@ -1007,7 +1006,6 @@ mod beacon_tests {
 			LatestFinalizedHeaderState::<mock::Test>::set(FinalizedHeaderState {
 				beacon_block_root: H256::default(),
 				beacon_slot: update.block.slot,
-				beacon_block_header: BeaconHeader::default(),
 				import_time: 0,
 			});
 
